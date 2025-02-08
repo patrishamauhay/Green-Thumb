@@ -14,7 +14,7 @@ export default function Login({ navigation }) {
     try {
       await auth().signInWithEmailAndPassword(email, password);
       Alert.alert('Success', 'You are logged in!');
-      navigation.replace('Home');
+      navigation.replace('Main');
       
     } catch (error) {
       Alert.alert('Error', error.message);
