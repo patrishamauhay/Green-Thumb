@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "161113660350",
+    "firebase_url": "https://greenthumb-125c0-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "greenthumb-125c0",
+    "storage_bucket": "greenthumb-125c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:161113660350:android:4a8ebdaeba197e2212f7ef",
+        "android_client_info": {
+          "package_name": "com.greenthumbapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSATQfU9A7nSTXNGiSJfHa_K-WzuP8cNs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:161113660350:android:ab9f35022248bff612f7ef",
+        "android_client_info": {
+          "package_name": "com.mygreenthumbapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSATQfU9A7nSTXNGiSJfHa_K-WzuP8cNs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
