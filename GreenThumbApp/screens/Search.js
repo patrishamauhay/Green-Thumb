@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { fetchPlants } from '../api/plants';
+import Icon from 'react-native-vector-icons/Ionicons'; // For icons
+import LinearGradient from 'react-native-linear-gradient'; // For gradient background
 
 export default function Search({ navigation }) {
   const [plants, setPlants] = useState([]);
@@ -24,7 +26,7 @@ export default function Search({ navigation }) {
   const fetchAllPlants = async () => {
     setIsLoading(true);
     try {
-      const results = await fetchPlants(''); // Fetch all plants
+      const results = await fetchPlants('');
       const sortedPlants = results.sort((a, b) => a.common_name.localeCompare(b.common_name));
       setPlants(sortedPlants);
     } catch (error) {
@@ -34,11 +36,11 @@ export default function Search({ navigation }) {
     }
   };
 
-  // Fetch search results in real-time as the user types
+  // Real-time search effect
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (searchQuery.trim() === '') {
-        fetchAllPlants(); // Show all plants when input is empty
+        fetchAllPlants();
         return;
       }
 
@@ -52,10 +54,10 @@ export default function Search({ navigation }) {
       } finally {
         setIsLoading(false);
       }
-    }, 500); // Debounce search by 500ms to prevent excessive API calls
+    }, 500);
 
-    return () => clearTimeout(delayDebounceFn); // Cleanup function to avoid multiple requests
-  }, [searchQuery]); // Runs every time searchQuery changes
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const renderPlantItem = ({ item }) => (
     <TouchableOpacity
@@ -65,7 +67,7 @@ export default function Search({ navigation }) {
       {item.default_image && (
         <Image source={{ uri: item.default_image.original_url }} style={styles.image} />
       )}
-      <View>
+      <View style={styles.textContainer}>
         <Text style={styles.name}>{item.common_name || 'Unknown Plant'}</Text>
         <Text style={styles.scientific}>{item.scientific_name?.join(', ')}</Text>
       </View>
@@ -73,16 +75,19 @@ export default function Search({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search for a plant..."
-        value={searchQuery}
-        onChangeText={setSearchQuery} // Updates the state immediately
-      />
+    <LinearGradient colors={['#E3F2FD', '#C8E6C9']} style={styles.container}>
+      <View style={styles.searchContainer}>
+        <Icon name="search-outline" size={20} color="#555" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search for a plant..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
 
       {isLoading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color="#388E3C" style={styles.loadingIndicator} />
       ) : (
         <FlatList
           data={plants}
@@ -91,30 +96,49 @@ export default function Search({ navigation }) {
           ListEmptyComponent={<Text style={styles.emptyMessage}>No plants found.</Text>}
         />
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
-  searchBar: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+  container: { flex: 1, padding: 16 },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
     marginBottom: 10,
+  },
+  searchIcon: { marginRight: 8 },
+  searchBar: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    marginBottom: 10,
+    padding: 12,
+    marginVertical: 6,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
     elevation: 3,
   },
-  image: { width: 60, height: 60, marginRight: 12, borderRadius: 8 },
-  name: { fontSize: 16, fontWeight: 'bold' },
-  scientific: { fontSize: 14, color: '#555' },
-  emptyMessage: { textAlign: 'center', marginTop: 20, fontSize: 16 },
+  image: { width: 60, height: 60, marginRight: 12, borderRadius: 10 },
+  textContainer: { flex: 1 },
+  name: { fontSize: 18, fontWeight: 'bold', color: '#000000' },
+  scientific: { fontSize: 14, color: '#666' },
+  loadingIndicator: { marginTop: 20 },
+  emptyMessage: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#888' },
 });

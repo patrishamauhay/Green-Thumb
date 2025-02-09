@@ -14,6 +14,7 @@ import Home from '../screens/Home';
 import Profile from '../screens/Profile';
 import Search from '../screens/Search'
 import PlantDetails from '../screens/PlantDetails'
+import MyGarden from '../screens/MyGarden'
 
 
 const Stack = createStackNavigator();
@@ -33,6 +34,8 @@ function BottomTabNavigator() {
             iconName = 'person-outline';
           }else if (route.name === 'Search') {
             iconName = 'person-outline';
+          }else if (route.name === 'MyGarden') {
+            iconName = 'person-outline';
           }
           
 
@@ -45,6 +48,8 @@ function BottomTabNavigator() {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Profile" component={Profile} />
       <Tab.Screen name="Search" component={Search} />
+      <Tab.Screen name="My Garden" component={MyGarden} />
+
 
     </Tab.Navigator>
   );
