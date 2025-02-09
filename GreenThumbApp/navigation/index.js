@@ -13,6 +13,8 @@ import SignUpScreen from '../screens/SignUp';
 import Home from '../screens/Home';
 import Profile from '../screens/Profile';
 import Search from '../screens/Search'
+import PlantDetails from '../screens/PlantDetails'
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,6 +58,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Main" component={BottomTabNavigator} />
+        <Stack.Screen name="PlantDetails" component={PlantDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -42,6 +42,7 @@ export default function Search({ navigation }) {
       </View>
     </TouchableOpacity>
   );
+  
 
   return (
     <View style={styles.container}>

@@ -21,15 +21,18 @@ export const fetchPlants = async (query) => {
 
 // Fetch details of a specific plant by its ID
 export const fetchPlantDetails = async (id) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/species/${id}`, {
-      params: {
-        key: API_KEY,
-      },
-    });
-    return response.data.data; // Return plant details
-  } catch (error) {
-    console.error('Error fetching plant details:', error);
-    throw error;
-  }
-};
+    try {
+      const response = await axios.get(`https://perenual.com/api/species/details/${id}`, {
+        params: {
+          key: API_KEY,
+        },
+      });
+  
+      console.log('Plant Details:', response.data);
+      return response.data || null; // Return plant details
+    } catch (error) {
+      console.error('Error fetching plant details:', error);
+      return null; // Return null if an error occurs
+    }
+  };
+  
