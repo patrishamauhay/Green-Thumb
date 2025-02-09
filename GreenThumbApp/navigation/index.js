@@ -12,6 +12,7 @@ import LoginScreen from '../screens/Login';
 import SignUpScreen from '../screens/SignUp';
 import Home from '../screens/Home';
 import Profile from '../screens/Profile';
+import Search from '../screens/Search'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,7 +29,10 @@ function BottomTabNavigator() {
             iconName = 'home-outline';
           } else if (route.name === 'Profile') {
             iconName = 'person-outline';
+          }else if (route.name === 'Search') {
+            iconName = 'person-outline';
           }
+          
 
           return <Icon name={iconName} size={size} color={color} />;
         },
@@ -38,6 +42,8 @@ function BottomTabNavigator() {
     >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Search" component={Search} />
+
     </Tab.Navigator>
   );
 }
