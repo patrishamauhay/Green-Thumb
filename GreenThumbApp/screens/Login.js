@@ -23,10 +23,7 @@ export default function Login({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-    <Text style={styles.title}>Login</Text>
-
-      <Image source={require('../assets/images/illustration_1.png')} style={styles.image} />
-      
+    <Text style={styles.title}>Login</Text>      
 
       <TextInput
         style={styles.input}
