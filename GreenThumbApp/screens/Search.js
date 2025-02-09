@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { fetchPlants } from '../api/plants';
 
@@ -15,18 +16,46 @@ export default function Search({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = async () => {
-    if (searchQuery.trim() === '') return; // Ignore empty searches
+  useEffect(() => {
+    fetchAllPlants();
+  }, []);
+
+  // Fetch all plants when the screen loads
+  const fetchAllPlants = async () => {
     setIsLoading(true);
     try {
-      const results = await fetchPlants(searchQuery);
-      setPlants(results);
+      const results = await fetchPlants(''); // Fetch all plants
+      const sortedPlants = results.sort((a, b) => a.common_name.localeCompare(b.common_name));
+      setPlants(sortedPlants);
     } catch (error) {
       console.error('Error fetching plants:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Fetch search results in real-time as the user types
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim() === '') {
+        fetchAllPlants(); // Show all plants when input is empty
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const results = await fetchPlants(searchQuery);
+        const sortedResults = results.sort((a, b) => a.common_name.localeCompare(b.common_name));
+        setPlants(sortedResults);
+      } catch (error) {
+        console.error('Error fetching plants:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500); // Debounce search by 500ms to prevent excessive API calls
+
+    return () => clearTimeout(delayDebounceFn); // Cleanup function to avoid multiple requests
+  }, [searchQuery]); // Runs every time searchQuery changes
 
   const renderPlantItem = ({ item }) => (
     <TouchableOpacity
@@ -42,7 +71,6 @@ export default function Search({ navigation }) {
       </View>
     </TouchableOpacity>
   );
-  
 
   return (
     <View style={styles.container}>
@@ -50,11 +78,11 @@ export default function Search({ navigation }) {
         style={styles.searchBar}
         placeholder="Search for a plant..."
         value={searchQuery}
-        onChangeText={setSearchQuery}
-        onSubmitEditing={handleSearch}
+        onChangeText={setSearchQuery} // Updates the state immediately
       />
+
       {isLoading ? (
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
         <FlatList
           data={plants}
