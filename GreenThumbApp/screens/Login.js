@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
+import { Button } from "../components";
+
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
