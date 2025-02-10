@@ -14,6 +14,7 @@ import Home from '../screens/Home';
 import Profile from '../screens/Profile';
 import Search from '../screens/Search'
 import PlantDetails from '../screens/PlantDetails'
+import UserPlantDetails from '../screens/UserPlantDetails'
 import MyGarden from '../screens/MyGarden'
 
 
@@ -64,6 +65,7 @@ export default function AppNavigator() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Main" component={BottomTabNavigator} />
         <Stack.Screen name="PlantDetails" component={PlantDetails} />
+        <Stack.Screen name="UserPlantDetails" component={UserPlantDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );
