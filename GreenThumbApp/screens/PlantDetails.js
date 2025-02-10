@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { fetchPlantDetails } from '../api/plants';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 
 export default function PlantDetails({ route, navigation }) {
   const { plantId } = route.params;
@@ -46,6 +46,11 @@ export default function PlantDetails({ route, navigation }) {
         <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
+      {/* Add Button (Plus Icon) */}
+      <TouchableOpacity style={styles.addButton} onPress={() => alert('Add button pressed!')}>
+        <Icon name="add" size={30} color="white" />
+      </TouchableOpacity>
+
       {/* Plant Image */}
       {plant.default_image && (
         <Image source={{ uri: plant.default_image.original_url }} style={styles.image} />
@@ -77,7 +82,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     position: 'absolute',
-    top: 40, // Adjust for notch screens
+    top: 40,
     left: 20,
     backgroundColor: '#D3D3D3',
     paddingVertical: 6,
@@ -89,5 +94,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
+  },
+
+  // Add Button Styling (Plus Icon)
+  addButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: '#4CAF50', // Green color for visibility
+    padding: 10,
+    borderRadius: 20,
+    elevation: 5, // Adds shadow effect
   },
 });
