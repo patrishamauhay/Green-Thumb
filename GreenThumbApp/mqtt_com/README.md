@@ -1,1 +1,0 @@
-This folder contains the files needed for mqtt communication. (pub/sub)
