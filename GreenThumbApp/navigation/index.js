@@ -11,7 +11,7 @@ import WelcomeScreen from '../screens/Welcome';
 import LoginScreen from '../screens/Login';
 import SignUpScreen from '../screens/SignUp';
 import Home from '../screens/Home';
-import Profile from '../screens/Profile';
+import WaterPlant from '../screens/WaterPlant';
 import Search from '../screens/Search'
 import PlantDetails from '../screens/PlantDetails'
 import UserPlantDetails from '../screens/UserPlantDetails'
@@ -31,7 +31,7 @@ function BottomTabNavigator() {
 
           if (route.name === 'Home') {
             iconName = 'home-outline';
-          } else if (route.name === 'Profile') {
+          } else if (route.name === 'WaterPlant') {
             iconName = 'person-outline';
           }else if (route.name === 'Search') {
             iconName = 'person-outline';
@@ -47,7 +47,7 @@ function BottomTabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Water" component={WaterPlant} />
       <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="My Garden" component={MyGarden} />
 
