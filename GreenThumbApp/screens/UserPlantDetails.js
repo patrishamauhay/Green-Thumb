@@ -153,9 +153,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
+    
   },
 
   infoText: { fontSize: 18, fontWeight: 'bold', marginTop: 5 },
