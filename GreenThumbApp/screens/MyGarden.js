@@ -52,11 +52,17 @@ export default function MyGarden({ navigation }) {
       </View>
     </TouchableOpacity>
   );
-  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Garden</Text>
+    <View style={styles.header}>
+    <Image source={require('../assets/images/leaf.png')} style={styles.icon} />
+        <Text style={styles.title}>My Garden</Text>
+      </View>
+
+      {/* Separator Line */}
+      <View style={styles.separator} />
+
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
@@ -64,7 +70,7 @@ export default function MyGarden({ navigation }) {
           data={plants}
           keyExtractor={(item) => item.id}
           renderItem={renderPlantItem}
-          numColumns={2} // Set grid layout (2 columns)
+          numColumns={2} // Grid layout (2 columns)
           columnWrapperStyle={styles.row} // Ensures spacing between columns
         />
       )}
@@ -74,13 +80,42 @@ export default function MyGarden({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  
-  row: { 
-    justifyContent: 'space-between', 
-    marginBottom: 10 
-  }, // Space between grid items
-  
+
+  /* Title Section */
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'flex-start', 
+    marginBottom: 8 
+  },
+  title: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginLeft: 10, 
+  },
+  icon: {
+    width: 20, // Adjust size
+    height: 20, 
+    resizeMode: 'contain',
+    marginRight: 8,
+  },
+  systeicon: {
+    width: 28, // Adjust size
+    height: 28, 
+    resizeMode: 'contain',
+  },
+  separator: {
+    height: 2,
+    backgroundColor: '#000000',
+    marginBottom: 15,
+    width: '90%',
+    alignSelf: 'center',
+  },
+
+  /* Grid Layout */
+  row: { justifyContent: 'space-between', marginBottom: 10 },
+
   card: {
     flex: 1,
     alignItems: 'center',
@@ -94,7 +129,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
-  
+
   image: { width: 100, height: 100, borderRadius: 8, marginBottom: 10 },
   name: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
   scientific: { fontSize: 14, color: '#555', textAlign: 'center', marginBottom: 5 },
