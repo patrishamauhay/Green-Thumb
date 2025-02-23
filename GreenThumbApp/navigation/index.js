@@ -15,6 +15,8 @@ import Search from '../screens/Search'
 import PlantDetails from '../screens/PlantDetails'
 import UserPlantDetails from '../screens/UserPlantDetails'
 import MyGarden from '../screens/MyGarden'
+import More from '../screens/More'
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -35,6 +37,8 @@ function BottomTabNavigator() {
             iconName = 'search-outline';         
           } else if (route.name === 'My Garden') {  
             iconName = 'leaf-outline';          
+          }else if (route.name === 'More') {  
+            iconName = 'ellipsis-horizontal-outline';          
           }
         
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -47,7 +51,8 @@ function BottomTabNavigator() {
       <Tab.Screen name="Water" component={WaterPlant} />
       <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="My Garden" component={MyGarden} />
-      
+      <Tab.Screen name="More" component={More} />
+
     </Tab.Navigator>
   );
 }
