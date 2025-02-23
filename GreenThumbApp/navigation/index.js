@@ -47,8 +47,7 @@ function BottomTabNavigator() {
       <Tab.Screen name="Water" component={WaterPlant} />
       <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="My Garden" component={MyGarden} />
-
-
+      
     </Tab.Navigator>
   );
 }

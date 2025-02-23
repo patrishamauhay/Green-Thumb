@@ -13,7 +13,6 @@ import {
 import { fetchPlantDetails } from '../api/plants';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function PlantDetails({ route, navigation }) {
   const { plantId } = route.params;
@@ -95,9 +94,46 @@ export default function PlantDetails({ route, navigation }) {
       <Text style={styles.scientific}>
         {plant.scientific_name?.join(', ') || 'No scientific name'}
       </Text>
-      <Text style={styles.info}>🌱 Cycle: {plant.cycle || 'Unknown'}</Text>
-      <Text style={styles.info}>💧 Watering: {plant.watering || 'Unknown'}</Text>
-      <Text style={styles.info}>☀️ Sunlight: {plant.sunlight?.join(', ') || 'Unknown'}</Text>
+
+      {/* Descriptions */}
+      {plant.description && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.description}>{plant.description}</Text>
+        </View>
+      )}
+      
+      <View style={styles.infoContainer}>
+        <Text style={styles.info}>🌱 Cycle: {plant.cycle || 'Unknown'}</Text>
+        <Text style={styles.info}>💧 Watering: {plant.watering || 'Unknown'}</Text>
+        <Text style={styles.info}>❄️ Hardiness Zone: {plant.hardiness_zone || 'Unknown'}</Text>
+        <Text style={styles.info}>☀️ Sunlight: {plant.sunlight?.join(', ') || 'Unknown'}</Text>
+        <Text style={styles.info}>🌿 Growth Rate: {plant.growth_rate || 'Unknown'}</Text>
+        <Text style={styles.info}>⚠️ Care Level: {plant.care_level || 'Unknown'}</Text>
+      </View>
+
+      
+
+      {plant.watering_description && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Watering Tips</Text>
+          <Text style={styles.description}>{plant.watering_description}</Text>
+        </View>
+      )}
+
+      {plant.sunlight_description && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sunlight Needs</Text>
+          <Text style={styles.description}>{plant.sunlight_description}</Text>
+        </View>
+      )}
+
+      {plant.pruning_description && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pruning Advice</Text>
+          <Text style={styles.description}>{plant.pruning_description}</Text>
+        </View>
+      )}
 
       {/* Custom Name Input */}
       <TextInput
@@ -116,12 +152,16 @@ export default function PlantDetails({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', padding: 16 },
+  container: { alignItems: 'center', padding: 16 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   image: { width: 200, height: 200, marginBottom: 20, borderRadius: 8 },
   name: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
   scientific: { fontSize: 18, fontStyle: 'italic', color: '#555', marginBottom: 20 },
-  info: { fontSize: 16, marginBottom: 10 },
+  infoContainer: { width: '90%', marginBottom: 20 },
+  info: { fontSize: 16, marginBottom: 5 },
+  section: { width: '90%', marginBottom: 15 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+  description: { fontSize: 16, color: '#666' },
   backButton: {
     position: 'absolute',
     top: 40,
