@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Image,
+  Image, 
   ScrollView,
   StyleSheet,
   ActivityIndicator,
@@ -78,31 +78,56 @@ export default function PlantDetails({ route, navigation }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>Back</Text>
-      </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-      {/* Plant Image */}
-      {plant.default_image && (
-        <Image source={{ uri: plant.default_image.original_url }} style={styles.image} />
-      )}
+      {/* Top Header Section */}
+      <View style={styles.headerContainer}>
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
 
-      {/* Plant Details */}
-      <Text style={styles.name}>{plant.common_name || 'Unknown Plant'}</Text>
-      <Text style={styles.scientific}>
-        {plant.scientific_name?.join(', ') || 'No scientific name'}
-      </Text>
+        {/* Save Button */}
+        <TouchableOpacity style={styles.saveButton} onPress={addToMyGarden}>
+          <Text style={styles.saveText}>Save</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Descriptions */}
-      {plant.description && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.description}>{plant.description}</Text>
+      {/* Plant Info Section */}
+      <View style={styles.topSection}>
+        {/* Plant Image */}
+        {plant.default_image && (
+          <Image source={{ uri: plant.default_image.original_url }} style={styles.image} />
+        )}
+
+        {/* Name and Input Section */}
+        <View style={styles.textContainer}>
+          <Text style={styles.name}>{plant.common_name || 'Unknown Plant'}</Text>
+          <Text style={styles.scientific}>{plant.scientific_name?.join(', ') || 'No scientific name'}</Text>
+
+          {/* Input Field */}
+          <TextInput
+            style={styles.input}
+            placeholder="Name your plant"
+            value={customName}
+            onChangeText={setCustomName}
+          />
         </View>
-      )}
+      </View>
+
+      {/* Separator */}
+      <View style={styles.separator} />
+
+      {/* About Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>About</Text>
+        <Text style={styles.description}>{plant.description || 'No description available.'}</Text>
+      </View>
       
+      {/* Separator */}
+      <View style={styles.separator} />
+
+      {/* Additional Info */}
       <View style={styles.infoContainer}>
         <Text style={styles.info}>🌱 Cycle: {plant.cycle || 'Unknown'}</Text>
         <Text style={styles.info}>💧 Watering: {plant.watering || 'Unknown'}</Text>
@@ -111,83 +136,110 @@ export default function PlantDetails({ route, navigation }) {
         <Text style={styles.info}>🌿 Growth Rate: {plant.growth_rate || 'Unknown'}</Text>
         <Text style={styles.info}>⚠️ Care Level: {plant.care_level || 'Unknown'}</Text>
       </View>
-
-      
-
-      {plant.watering_description && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Watering Tips</Text>
-          <Text style={styles.description}>{plant.watering_description}</Text>
-        </View>
-      )}
-
-      {plant.sunlight_description && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sunlight Needs</Text>
-          <Text style={styles.description}>{plant.sunlight_description}</Text>
-        </View>
-      )}
-
-      {plant.pruning_description && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pruning Advice</Text>
-          <Text style={styles.description}>{plant.pruning_description}</Text>
-        </View>
-      )}
-
-      {/* Custom Name Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Give your plant a name..."
-        value={customName}
-        onChangeText={setCustomName}
-      />
-
-      {/* Add to My Garden Button */}
-      <TouchableOpacity style={styles.addButton} onPress={addToMyGarden}>
-        <Text style={styles.addText}>Add to My Garden</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', padding: 16 },
+
+  /* Loading State */
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  image: { width: 200, height: 200, marginBottom: 20, borderRadius: 8 },
-  name: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  scientific: { fontSize: 18, fontStyle: 'italic', color: '#555', marginBottom: 20 },
-  infoContainer: { width: '90%', marginBottom: 20 },
-  info: { fontSize: 16, marginBottom: 5 },
-  section: { width: '90%', marginBottom: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
-  description: { fontSize: 16, color: '#666' },
+
+  /* Header Section */
+  headerContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+
+  /* Back Button */
   backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
     backgroundColor: '#ACADA8',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
   },
   backText: { fontSize: 16, fontWeight: 'bold', color: '#FFFFFF' },
+
+  /* Save Button */
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  saveText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  /* Top Section */
+  topSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  image: {
+    width: 90,
+    height: 90,
+    borderRadius: 50,
+    marginRight: 16,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  scientific: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    color: '#555',
+    marginBottom: 5,
+  },
+
+  /* Input */
   input: {
-    width: '90%',
-    padding: 12,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    marginTop: 10,
-    backgroundColor: '#fff',
+    padding: 8,
+    backgroundColor: '#f8f8f8',
   },
-  addButton: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    marginTop: 10,
-    borderRadius: 8,
-    alignItems: 'center',
+
+  /* Separator */
+  separator: {
+    height: 1,
+    backgroundColor: '#ccc',
     width: '90%',
+    marginVertical: 20,
   },
-  addText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
+
+  /* Sections */
+  section: {
+    width: '100%',
+    paddingHorizontal: 16,
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  description: {
+    fontSize: 16,
+    color: '#666',
+  },
+
+  /* Additional Info */
+  infoContainer: { width: '100%', paddingHorizontal: 16, marginBottom: 20 },
+  info: { fontSize: 16, marginBottom: 5 },
 });
