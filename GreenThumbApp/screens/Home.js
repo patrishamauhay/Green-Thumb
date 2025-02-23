@@ -88,11 +88,11 @@ export default function Home({ navigation }) {
         </View>
       </View>
 */}
-      {/* Floating Add Button */}
+      {/* Floating Add Button 
       <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('AddPlant')}>
         <Icon name="plus" size={30} color="white" />
       </TouchableOpacity>
-
+*/}
       {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
@@ -218,6 +218,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
+    marginBottom: 15,
+
   },
   logoutText: {
     color: 'white',

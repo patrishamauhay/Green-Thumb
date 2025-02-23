@@ -4,8 +4,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/Ionicons';
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import WelcomeScreen from '../screens/Welcome';
 import LoginScreen from '../screens/Login';
@@ -16,7 +15,6 @@ import Search from '../screens/Search'
 import PlantDetails from '../screens/PlantDetails'
 import UserPlantDetails from '../screens/UserPlantDetails'
 import MyGarden from '../screens/MyGarden'
-
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -38,9 +36,8 @@ function BottomTabNavigator() {
           } else if (route.name === 'My Garden') {  
             iconName = 'leaf-outline';          
           }
-          
-
-          return <Icon name={iconName} size={size} color={color} />;
+        
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#4CAF50',
         tabBarInactiveTintColor: 'gray',

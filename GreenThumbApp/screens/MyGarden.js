@@ -55,16 +55,20 @@ export default function MyGarden({ navigation }) {
 
   return (
     <View style={styles.container}>
-    <View style={styles.header}>
-    <Image source={require('../assets/images/leaf.png')} style={styles.icon} />
-        <Text style={styles.title}>My Garden</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}> 🌱 My Garden</Text>
       </View>
-
+  
       {/* Separator Line */}
       <View style={styles.separator} />
-
+  
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
+      ) : plants.length === 0 ? (
+        <View style={styles.noPlantsContainer}>
+          <Text style={styles.noPlantsText}>No plants added yet!</Text>
+          <Text style={styles.noPlantsSubtext}>Start growing your garden by adding new plants.</Text>
+        </View>
       ) : (
         <FlatList
           data={plants}
@@ -76,6 +80,7 @@ export default function MyGarden({ navigation }) {
       )}
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -89,29 +94,43 @@ const styles = StyleSheet.create({
     marginBottom: 8 
   },
   title: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
+    fontSize: 32, 
+    fontWeight: '900', 
     textAlign: 'center', 
     marginLeft: 10, 
   },
-  icon: {
-    width: 20, // Adjust size
-    height: 20, 
-    resizeMode: 'contain',
-    marginRight: 8,
-  },
   systeicon: {
-    width: 28, // Adjust size
+    width: 28, 
     height: 28, 
     resizeMode: 'contain',
   },
   separator: {
-    height: 2,
+    height: 1,
     backgroundColor: '#000000',
     marginBottom: 15,
     width: '90%',
     alignSelf: 'center',
   },
+  noPlantsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  
+  noPlantsText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555',
+    textAlign: 'center',
+  },
+  
+  noPlantsSubtext: {
+    fontSize: 14,
+    color: '#777',
+    textAlign: 'center',
+    marginTop: 5,
+  },  
 
   /* Grid Layout */
   row: { justifyContent: 'space-between', marginBottom: 10 },
