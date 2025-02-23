@@ -119,14 +119,14 @@ const styles = StyleSheet.create({
   },
   
   noPlantsText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#555',
     textAlign: 'center',
   },
   
   noPlantsSubtext: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#777',
     textAlign: 'center',
     marginTop: 5,

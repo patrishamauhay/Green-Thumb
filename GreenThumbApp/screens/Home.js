@@ -45,10 +45,11 @@ export default function Home({ navigation }) {
         style={styles.backgroundImage} 
         resizeMode="cover"
       />
-      <Text style={styles.welcomeText}>Welcome {user?.displayName || 'Gardener'} !</Text>
+      <Text style={styles.welcomeText}>Welcome, {user?.displayName || 'Gardener'} !</Text>
       </View>
 
       {/* My Garden Section */}
+      {/*
       <View style={styles.gardenContainer}>
         <Text style={styles.sectionTitle}>🌿 My Garden</Text>
         <View style={styles.plantList}>
@@ -62,7 +63,7 @@ export default function Home({ navigation }) {
         </View>
       </View>
 
-      {/* Quick Access Buttons 
+       Quick Access Buttons 
       <View style={styles.quickAccessContainer}>
         <Text style={styles.sectionTitle}>⚡ Quick Access</Text>
         <View style={styles.quickButtons}>
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   welcomeText: {
-    fontSize: 22,
+    fontSize: 27,
     fontWeight: '900',
     marginBottom: 5,
     padding: 17,
