@@ -7,9 +7,12 @@ import {
   ScrollView,
   Image,
   Alert,
+  Dimensions
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+const { width, height } = Dimensions.get("window");
+
 
 export default function Home({ navigation }) {
   const [user, setUser] = useState(null);
@@ -36,19 +39,13 @@ export default function Home({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header Section */}
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>Welcome, {user?.displayName || 'Gardener'}</Text>
-        <Image
-          source={{ uri: 'https://i.imgur.com/zsKrGUP.png' }} // Placeholder Image
-          style={styles.bannerImage}
-        />
-      </View>
-
-      {/* Water Tank Alert */}
-      <View style={styles.alertContainer}>
-        <Text style={styles.alertText}>
-          🚨 Water Tank {waterTankLevel < 15 ? 'Low' : 'Good'}
-        </Text>
+      <View style={styles.container}>
+        <Image 
+        source={require("../assets/images/Home_Background.png")}  
+        style={styles.backgroundImage} 
+        resizeMode="cover"
+      />
+      <Text style={styles.welcomeText}>Welcome {user?.displayName || 'Gardener'} !</Text>
       </View>
 
       {/* My Garden Section */}
@@ -65,7 +62,7 @@ export default function Home({ navigation }) {
         </View>
       </View>
 
-      {/* Quick Access Buttons */}
+      {/* Quick Access Buttons 
       <View style={styles.quickAccessContainer}>
         <Text style={styles.sectionTitle}>⚡ Quick Access</Text>
         <View style={styles.quickButtons}>
@@ -90,7 +87,7 @@ export default function Home({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-
+*/}
       {/* Floating Add Button */}
       <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('AddPlant')}>
         <Icon name="plus" size={30} color="white" />
@@ -105,9 +102,17 @@ export default function Home({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    width: width,
+    height: height * 0.35,
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
   container: {
     flexGrow: 1,
-    padding: 16,
+    //padding: 16,
+    flex: 1,
     backgroundColor: '#F5F5F5',
   },
   header: {
@@ -116,9 +121,12 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '900',
     marginBottom: 5,
+    padding: 17,
+    color: '#FFFFFF',
   },
+
   bannerImage: {
     width: '100%',
     height: 150,
@@ -137,7 +145,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   gardenContainer: {
-    backgroundColor: '#388E3C',
+    backgroundColor: '#8ABD91',
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,

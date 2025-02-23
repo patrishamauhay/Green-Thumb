@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import { TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import { Button, Text } from "../components";
 
 export default function SignUp({ navigation }) {
   const [name, setName] = useState('');
@@ -68,9 +69,11 @@ export default function SignUp({ navigation }) {
 
       {errors.length > 0 && <Text style={styles.errorText}>{errors[0]}</Text>}
 
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+      <Button gradient onPress={handleSignUp} style={styles.fullWidthButton} textStyle={{ fontSize: 26 }} >
+              <Text center semibold white>
+                Sign Up
+              </Text>
+            </Button>
 
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.signupText}>Already have an account? Login</Text>
@@ -80,6 +83,10 @@ export default function SignUp({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  fullWidthButton: {
+    width: "100%",  
+    marginVertical: 10,
+  },  
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -103,19 +110,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
   },
-  button: {
-    width: '100%',
-    backgroundColor: '#2E6F40',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+ 
   signupText: {
     fontSize: 16,
     color: '#888',

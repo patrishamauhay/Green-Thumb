@@ -31,12 +31,12 @@ function BottomTabNavigator() {
 
           if (route.name === 'Home') {
             iconName = 'home-outline';
-          } else if (route.name === 'WaterPlant') {
-            iconName = 'person-outline';
-          }else if (route.name === 'Search') {
-            iconName = 'person-outline';
-          }else if (route.name === 'MyGarden') {
-            iconName = 'person-outline';
+          } else if (route.name === 'Water') { 
+            iconName = 'water-outline';         
+          } else if (route.name === 'Search') {
+            iconName = 'search-outline';         
+          } else if (route.name === 'My Garden') {  
+            iconName = 'leaf-outline';          
           }
           
 

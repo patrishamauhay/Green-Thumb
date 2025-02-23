@@ -3,10 +3,10 @@
 // Automatically maintains sessions for users
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
-import { Button } from "../components";
+import { Button, Text } from "../components";
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
@@ -42,10 +42,12 @@ export default function Login({ navigation }) {
         onChangeText={setPassword}
         secureTextEntry
       />
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+      
+      <Button gradient onPress={handleLogin} style={styles.fullWidthButton}>
+        <Text center semibold white>
+          Login
+        </Text>
+      </Button>
 
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
@@ -55,6 +57,10 @@ export default function Login({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  fullWidthButton: {
+    width: "100%",  
+    marginVertical: 10, 
+  },  
   container: {
     flex: 1,
     justifyContent: 'center',
