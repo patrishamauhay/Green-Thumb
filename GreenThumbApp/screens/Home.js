@@ -7,19 +7,45 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  FlatList,
+  ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const { width, height } = Dimensions.get("window");
 
 export default function Home({ navigation }) {
   const [user, setUser] = useState(null);
+  const [myGarden, setMyGarden] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const userId = auth().currentUser?.uid;
+
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(setUser);
     return () => unsubscribe();
   }, []);
+  useEffect(() => {
+    if (userId) {
+      const unsubscribe = firestore()
+        .collection('users')
+        .doc(userId)
+        .collection('myGarden')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+          const plantList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setMyGarden(plantList);
+          setLoading(false);
+        });
+      return unsubscribe;
+    }
+  }, [userId]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -44,12 +70,43 @@ export default function Home({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* My Garden Section 
-            <View style={styles.gardenContainer}>
+      {/* My Garden Section */}
+      <View style={styles.gardenContainer}>
         <Text style={styles.sectionTitle}>🌿 My Garden</Text>
+        
+        {loading ? (
+          <ActivityIndicator size="large" color="#4CAF50" />
+        ) : myGarden.length === 0 ? (
+          <Text style={styles.noPlantsText}>No plants added yet!</Text>
+        ) : (
+          <FlatList
+            data={myGarden.slice(0, 4)} // Show only 4 plants in Quick View
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.plantCard}
+                onPress={() =>
+                  navigation.navigate('UserPlantDetails', { plantId: item.plantId, docId: item.id })
+                }
+              >
+                <ImageBackground 
+                  source={{ uri: item.imageUrl }} 
+                  style={styles.imageBackground} 
+                  imageStyle={{ borderRadius: 10 }}
+                >
+                  {/* Plant Name Overlay */}
+                  <View style={styles.nameOverlay}>
+                    <Text style={styles.plantName}>{item.userPlantName || 'Unnamed Plant'}</Text>
+                  </View>
+                </ImageBackground>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
-      */}
-
+    
     </ScrollView>
   );
 }
@@ -103,12 +160,52 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   gardenContainer: {
-    marginTop: 15,
+    marginTop: 20,
     backgroundColor: '#8ABD91',
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
-
+    marginHorizontal: 16,
   },
+  sectionTitle: {
+    fontSize: 20, 
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+
+  noPlantsText: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  plantCard: {
+    width: 100, 
+    height: 110, 
+    borderRadius: 10,
+    marginRight: 10,
+    elevation: 3,
+  },
+  imageBackground: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  nameOverlay: {
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingVertical: 5,
+    alignItems: 'center',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  plantName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+
 });
  
