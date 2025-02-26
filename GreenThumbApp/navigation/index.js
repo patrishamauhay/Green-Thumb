@@ -16,6 +16,8 @@ import PlantDetails from '../screens/PlantDetails'
 import UserPlantDetails from '../screens/UserPlantDetails'
 import MyGarden from '../screens/MyGarden'
 import More from '../screens/More'
+import WaterHistory from '../screens/WaterHistory'
+
 
 
 const Stack = createStackNavigator();
@@ -67,6 +69,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Main" component={BottomTabNavigator} />
         <Stack.Screen name="PlantDetails" component={PlantDetails} />
         <Stack.Screen name="UserPlantDetails" component={UserPlantDetails} />
+        <Stack.Screen name="WaterHistory" component={WaterHistory} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

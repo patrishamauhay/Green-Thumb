@@ -1,100 +1,50 @@
-// 'Water Plant' Screen
-// Publishes message to ESP32 to turn off/on the relay
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import mqtt from 'mqtt/dist/mqtt';
-import 'react-native-url-polyfill/auto';
+import Slider from '@react-native-community/slider';
 
-// MQTT Configuration
-const MQTT_BROKER = "ws://test.mosquitto.org:8080"; // WebSocket connection for MQTT
-const TOPIC = "relay_control";
-
-export default function WaterPlant() {
-  const [lastWatered, setLastWatered] = useState(null);
+export default function WaterPlant({ navigation }) {
   const [isWatering, setIsWatering] = useState(false);
-  const [client, setClient] = useState(null);
+  const [wateringDuration, setWateringDuration] = useState(2);
 
-  // Connect to MQTT broker when the component mounts
-  useEffect(() => {
-    const mqttClient = mqtt.connect(MQTT_BROKER);
-
-    mqttClient.on("connect", () => {
-      console.log("Connected to MQTT broker");
-    });
-
-    mqttClient.on("error", (err) => {
-      console.error("MQTT Error:", err);
-    });
-
-    setClient(mqttClient);
-
-    return () => {
-      mqttClient.end(); // Disconnect when component unmounts
-    };
-  }, []);
-
-  // Load last watering time from AsyncStorage
-  useEffect(() => {
-    loadLastWatered();
-  }, []);
-
-  const loadLastWatered = async () => {
+  // Save only the last watered time
+  const saveWateringTime = async (time) => {
     try {
-      const storedTime = await AsyncStorage.getItem('lastWatered');
-      if (storedTime) {
-        setLastWatered(storedTime);
-      }
+      await AsyncStorage.setItem('lastWatered', time);
     } catch (error) {
-      console.error('Failed to load watering data', error);
-    }
-  };
-
-  // Function to publish MQTT message
-  const sendMQTTMessage = (message) => {
-    if (client) {
-      client.publish(TOPIC, message);
-      console.log(`Sent MQTT Message: ${message}`);
-    } else {
-      console.error("MQTT Client is not connected");
+      console.error('Failed to save watering time', error);
     }
   };
 
   const handleWaterPlant = async () => {
     setIsWatering(true);
-
-    // Send "ON" message to turn on the relay
-    sendMQTTMessage("ON");
-
     setTimeout(async () => {
-      // Send "OFF" message to turn off the relay after 2 seconds
-      sendMQTTMessage("OFF");
-
       const now = new Date().toLocaleString();
-      setLastWatered(now);
-
-      try {
-        await AsyncStorage.setItem('lastWatered', now);
-        Alert.alert('Success', 'Your plant has been watered!');
-      } catch (error) {
-        console.error('Failed to save watering data', error);
-      }
-
+      await saveWateringTime(now);
+      Alert.alert('Success', `Your plant has been watered for ${wateringDuration} seconds!`);
       setIsWatering(false);
-    }, 2000); // Simulates watering delay
+    }, wateringDuration * 1000);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Water Your Plant</Text>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>
-          {lastWatered ? `Last watered: ${lastWatered}` : 'You haven\'t watered this plant yet!'}
-        </Text>
+      <View style={styles.sliderContainer}>
+        <Text style={styles.sliderText}>Watering Duration: {wateringDuration} sec</Text>
+        <Slider
+          style={{ width: 250, height: 40 }}
+          minimumValue={2}
+          maximumValue={10}
+          step={1}
+          value={wateringDuration}
+          onValueChange={(value) => setWateringDuration(value)}
+          minimumTrackTintColor="#2E6F40"
+          maximumTrackTintColor="#A5D6A7"
+          thumbTintColor="#2E6F40"
+        />
       </View>
 
       <TouchableOpacity 
@@ -103,6 +53,13 @@ export default function WaterPlant() {
         disabled={isWatering}
       >
         {isWatering ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Water Plant</Text>}
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.waterButton} 
+        onPress={() => navigation.navigate('WaterHistory')}
+      >
+        <Text style={styles.buttonText}>View Water History</Text>
       </TouchableOpacity>
     </View>
   );
@@ -122,31 +79,25 @@ const styles = StyleSheet.create({
     color: '#2E6F40',
     marginBottom: 20,
   },
-  infoContainer: {
-    padding: 15,
-    backgroundColor: '#E3F2E1',
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-  },
   button: {
     width: '80%',
     backgroundColor: '#2E6F40',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginVertical: 20,
+    marginTop: 20,
   },
-  disabledButton: {
-    backgroundColor: '#A5D6A7',
+  waterButton: {
+    width: '80%',
+    backgroundColor: '#004d40',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
-
 });

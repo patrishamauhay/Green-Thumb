@@ -13,6 +13,8 @@ import {
 import { fetchPlantDetails } from '../api/plants';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 export default function PlantDetails({ route, navigation }) {
   const { plantId } = route.params;
@@ -83,9 +85,9 @@ export default function PlantDetails({ route, navigation }) {
       {/* Top Header Section */}
       <View style={styles.headerContainer}>
         {/* Back Button */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="grey" />
+      </TouchableOpacity>
 
         {/* Save Button */}
         <TouchableOpacity style={styles.saveButton} onPress={addToMyGarden}>
@@ -158,10 +160,10 @@ const styles = StyleSheet.create({
 
   /* Back Button */
   backButton: {
-    backgroundColor: '#ACADA8',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+    padding: 10,
+    borderRadius: 50,
+    backgroundColor: '#E3E3E3',
+    marginRight: 10,
   },
   backText: { fontSize: 16, fontWeight: 'bold', color: '#FFFFFF' },
 
