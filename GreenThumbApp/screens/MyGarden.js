@@ -75,8 +75,8 @@ export default function MyGarden({ navigation }) {
           data={plants}
           keyExtractor={(item) => item.id}
           renderItem={renderPlantItem}
-          numColumns={2} // Grid layout (2 columns)
-          columnWrapperStyle={styles.row} // Ensures spacing between columns
+          numColumns={2}
+          columnWrapperStyle={styles.row} 
         />
       )}
     </View>
@@ -86,13 +86,11 @@ export default function MyGarden({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
-
-  /* Title Section */
   header: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'flex-start', 
-    marginBottom: 8 
+    marginBottom: 8, 
   },
   title: { 
     fontSize: 30, 

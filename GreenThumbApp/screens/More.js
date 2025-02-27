@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Text,
   StyleSheet,
@@ -7,7 +7,8 @@ import {
   View,
   Alert,
   TextInput,
-  Dimensions
+  Dimensions,
+  Animated
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
@@ -18,6 +19,7 @@ export default function More({ navigation }) {
   const [user, setUser] = useState(null);
   const [sensorId, setSensorId] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('');
+  const slideAnim = useRef(new Animated.Value(Dimensions.get('screen').width)).current; // For side sheet
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(setUser);
@@ -43,42 +45,64 @@ export default function More({ navigation }) {
     setSelectedPlant('');
   };
 
+  // Open Side Sheet
+  const openDrawer = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  // Close Side Sheet
+  const closeDrawer = () => {
+    Animated.timing(slideAnim, {
+      toValue: Dimensions.get('screen').width,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}> More Actions</Text>
+        <Text style={styles.title}>More Actions</Text>
+        <TouchableOpacity onPress={openDrawer}>
+          <Ionicons name="settings-outline" size={28} color="#333" />
+        </TouchableOpacity>
       </View>
-  
+
       <Separator />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.widgetsContainer}>
           {/* Sensor Configuration Widget */}
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="wifi-outline" size={40} color="#2E6F40" />
+            <Ionicons name="wifi-outline" size={40} color="#FFFFFF" />
             <Text style={styles.widgetText}>Sensors</Text>
           </TouchableOpacity>
 
           {/* Set Reminder Widget */}
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="alarm-outline" size={40} color="#2E6F40" />
+            <Ionicons name="alarm-outline" size={40} color="#FFFFFF" />
             <Text style={styles.widgetText}>Set Reminder</Text>
           </TouchableOpacity>
 
           {/* Water Tank Widget */}
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="water-outline" size={40} color="#2E6F40" />
+            <Ionicons name="water-outline" size={40} color="#FFFFFF" />
             <Text style={styles.widgetText}>Water Tank</Text>
           </TouchableOpacity>
 
           {/* Light Meter Widget */}
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="bulb-outline" size={40} color="#2E6F40" />
+            <Ionicons name="bulb-outline" size={40} color="#FFFFFF" />
             <Text style={styles.widgetText}>Light Meter</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Sensor Configuration Widget (with wifi-outline icon) */}
+        {/* Sensor Configuration Widget */}
         <View style={styles.widgetBox}>
           <View style={styles.widgetHeader}>
             <Ionicons name="wifi-outline" size={30} color="#2E6F40" />
@@ -108,10 +132,16 @@ export default function More({ navigation }) {
         </View>
       </ScrollView>
 
-      {/* Logout Button at Bottom */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+      {/* Side Sheet (Right Drawer) */}
+      <Animated.View style={[styles.drawer, { left: slideAnim }]}>
+        <TouchableOpacity onPress={closeDrawer} style={styles.closeDrawer}>
+          <Ionicons name="close" size={28} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.drawerTitle}>Settings</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -123,11 +153,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 15,
   },
   content: {
     paddingHorizontal: 20,
@@ -140,7 +175,7 @@ const styles = StyleSheet.create({
   },
   widget: {
     width: width * 0.4,
-    backgroundColor: '#fff',
+    backgroundColor: '#179b9e',
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
@@ -150,9 +185,9 @@ const styles = StyleSheet.create({
   },
   widgetText: {
     marginTop: 10,
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFFFFF',
   },
   widgetBox: {
     backgroundColor: '#fff',
@@ -199,20 +234,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  drawer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#fff',
+    elevation: 5,
+    padding: 20,
+  },
+  closeDrawer: {
+    alignSelf: 'flex-end',
+  },
+  drawerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
   logoutButton: {
     backgroundColor: '#D32F2F',
-    padding: 15,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 8,
     alignItems: 'center',
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    width: width * 0.9,
+    marginTop: 20,
   },
   logoutText: {
-    color: 'white',
-    fontSize: 18,
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
-
