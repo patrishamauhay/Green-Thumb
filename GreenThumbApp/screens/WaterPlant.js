@@ -59,7 +59,7 @@ export default function WaterPlant({ navigation }) {
         style={styles.waterButton} 
         onPress={() => navigation.navigate('WaterHistory')}
       >
-        <Text style={styles.buttonText}>View Water History</Text>
+        <Text style={styles.buttonText}>View History</Text>
       </TouchableOpacity>
     </View>
   );

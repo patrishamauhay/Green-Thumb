@@ -11,6 +11,8 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
+import Separator  from '../components/Separator';
+
 export default function MyGarden({ navigation }) {
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,8 +61,7 @@ export default function MyGarden({ navigation }) {
         <Text style={styles.title}> 🌱 My Garden</Text>
       </View>
   
-      {/* Separator Line */}
-      <View style={styles.separator} />
+      <Separator></Separator>
   
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
@@ -94,8 +95,8 @@ const styles = StyleSheet.create({
     marginBottom: 8 
   },
   title: { 
-    fontSize: 32, 
-    fontWeight: '900', 
+    fontSize: 30, 
+    fontWeight: '500', 
     textAlign: 'center', 
     marginLeft: 10, 
   },
@@ -104,13 +105,7 @@ const styles = StyleSheet.create({
     height: 28, 
     resizeMode: 'contain',
   },
-  separator: {
-    height: 1,
-    backgroundColor: '#000000',
-    marginBottom: 15,
-    width: '90%',
-    alignSelf: 'center',
-  },
+
   noPlantsContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -149,7 +144,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  image: { width: 100, height: 100, borderRadius: 8, marginBottom: 10 },
+  image: { width: 90, height: 90, borderRadius: 8, marginBottom: 10 },
   name: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
   scientific: { fontSize: 14, color: '#555', textAlign: 'center', marginBottom: 5 },
 
