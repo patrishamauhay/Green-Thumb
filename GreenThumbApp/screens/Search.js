@@ -10,8 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { fetchPlants } from '../api/plants';
-import Icon from 'react-native-vector-icons/Ionicons'; // For icons
-import LinearGradient from 'react-native-linear-gradient'; // For gradient background
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function Search({ navigation }) {
   const [plants, setPlants] = useState([]);
@@ -27,7 +26,8 @@ export default function Search({ navigation }) {
     setIsLoading(true);
     try {
       const results = await fetchPlants('');
-      const sortedPlants = results.sort((a, b) => a.common_name.localeCompare(b.common_name));
+      const filteredPlants = results.filter((plant) => plant.default_image); // Only keep plants with images
+      const sortedPlants = filteredPlants.sort((a, b) => a.common_name.localeCompare(b.common_name));
       setPlants(sortedPlants);
     } catch (error) {
       console.error('Error fetching plants:', error);
@@ -47,7 +47,8 @@ export default function Search({ navigation }) {
       setIsLoading(true);
       try {
         const results = await fetchPlants(searchQuery);
-        const sortedResults = results.sort((a, b) => a.common_name.localeCompare(b.common_name));
+        const filteredResults = results.filter((plant) => plant.default_image); // Filter out plants without images
+        const sortedResults = filteredResults.sort((a, b) => a.common_name.localeCompare(b.common_name));
         setPlants(sortedResults);
       } catch (error) {
         console.error('Error fetching plants:', error);
@@ -60,34 +61,37 @@ export default function Search({ navigation }) {
   }, [searchQuery]);
 
   const renderPlantItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate('PlantDetails', { plantId: item.id })}
-    >
-      {item.default_image && (
+    <View>
+      <View style={styles.card}>
         <Image source={{ uri: item.default_image.original_url }} style={styles.image} />
-      )}
-      <View style={styles.textContainer}>
-        <Text style={styles.name}>{item.common_name || 'Unknown Plant'}</Text>
-        <Text style={styles.scientific}>{item.scientific_name?.join(', ')}</Text>
+        <View style={styles.textContainer}>
+          <Text style={styles.name}>{item.common_name || 'Unknown Plant'}</Text>
+          <Text style={styles.scientific}>{item.scientific_name?.join(', ')}</Text>
+        </View>
       </View>
-    </TouchableOpacity>
+      <View style={styles.separator} />
+    </View>
   );
 
   return (
-    <LinearGradient colors={['#E3F2FD', '#C8E6C9']} style={styles.container}>
+    <View style={styles.container}>
+      {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Icon name="search-outline" size={20} color="#555" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search for a plant..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <View style={styles.searchBarContainer}>
+          <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search plants"
+            placeholderTextColor="#666"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
       </View>
 
+      {/* Loading Indicator */}
       {isLoading ? (
-        <ActivityIndicator size="large" color="#388E3C" style={styles.loadingIndicator} />
+        <ActivityIndicator size="large" color="#4CAF50" style={styles.loadingIndicator} />
       ) : (
         <FlatList
           data={plants}
@@ -96,49 +100,87 @@ export default function Search({ navigation }) {
           ListEmptyComponent={<Text style={styles.emptyMessage}>No plants found.</Text>}
         />
       )}
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    paddingTop: 16,
+  },
+
   searchContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+
+  searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#F3F3F3',
+    borderRadius: 25,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 10,
   },
-  searchIcon: { marginRight: 8 },
+
+  searchIcon: {
+    marginRight: 8,
+  },
+
   searchBar: {
     flex: 1,
     fontSize: 16,
     color: '#333',
   },
+
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    marginVertical: 6,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
   },
-  image: { width: 60, height: 60, marginRight: 12, borderRadius: 10 },
-  textContainer: { flex: 1 },
-  name: { fontSize: 18, fontWeight: 'bold', color: '#000000' },
-  scientific: { fontSize: 14, color: '#666' },
-  loadingIndicator: { marginTop: 20 },
-  emptyMessage: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#888' },
+
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 16,
+  },
+
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+
+  textContainer: {
+    flex: 1,
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+
+  scientific: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+
+  loadingIndicator: {
+    marginTop: 20,
+  },
+
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#888',
+  },
 });
+

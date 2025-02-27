@@ -56,12 +56,11 @@ export default function MyGarden({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Updated Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>My Garden</Text>
-        <TouchableOpacity onPress={() => console.log('Settings Pressed')}>
-          <Ionicons name="settings-outline" size={28} color="#333" />
-        </TouchableOpacity>
+        <View style={styles.titleContainer}>
+          <Ionicons name="leaf" size={28} color="#2E7D32" /> 
+          <Text style={styles.title}> My Garden</Text>
+        </View>
       </View>
 
       {loading ? (
@@ -85,11 +84,13 @@ export default function MyGarden({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
 
   header: { 
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
@@ -97,9 +98,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
   title: { 
     fontSize: 22, 
     fontWeight: 'bold',
+    marginLeft: 8,
   },
 
   noPlantsContainer: {
@@ -123,7 +130,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },  
 
-  row: { justifyContent: 'space-between', marginBottom: 10 },
+  row: { 
+    justifyContent: 'space-between', 
+    marginBottom: 10 
+  },
 
   card: {
     flex: 1,
@@ -139,10 +149,34 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  image: { width: 90, height: 90, borderRadius: 8, marginBottom: 10 },
-  name: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
-  scientific: { fontSize: 14, color: '#555', textAlign: 'center', marginBottom: 5 },
+  image: { 
+    width: 90, 
+    height: 90, 
+    borderRadius: 8, 
+    marginBottom: 10 
+  },
 
-  infoContainer: { flexDirection: 'row', justifyContent: 'space-around', width: '100%' },
-  infoText: { fontSize: 12, color: '#666' },
+  name: { 
+    fontSize: 16, 
+    fontWeight: 'bold', 
+    textAlign: 'center' 
+  },
+
+  scientific: { 
+    fontSize: 14, 
+    color: '#555', 
+    textAlign: 'center', 
+    marginBottom: 5 
+  },
+
+  infoContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-around', 
+    width: '100%' 
+  },
+
+  infoText: { 
+    fontSize: 12, 
+    color: '#666' 
+  },
 });
