@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     width: '90%',
-    elevation: 3,
+    elevation: 2,
   },
 
   searchIcon: {
@@ -161,11 +161,12 @@ const styles = StyleSheet.create({
   },
   gardenContainer: {
     marginTop: 20,
-    backgroundColor: '#D3D3D3',
+    backgroundColor: '#FFFFFF',
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
     marginHorizontal: 16,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 20, 
