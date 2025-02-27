@@ -1,8 +1,8 @@
 import Block from "./Block";
 import Button from "./Button";
 import Text from "./Text";
-import Separator from "./Separator";
+import SettingsDrawer from "./SettingsDrawer";
 
 
 
-export { Block, Button, Text, Separator};
+export { Block, Button, Text, SettingsDrawer};

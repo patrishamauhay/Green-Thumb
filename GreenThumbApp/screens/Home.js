@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   gardenContainer: {
     marginTop: 20,
-    backgroundColor: '#8ABD91',
+    backgroundColor: '#D3D3D3',
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20, 
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#5A5A5A',
     marginBottom: 10,
   },
 

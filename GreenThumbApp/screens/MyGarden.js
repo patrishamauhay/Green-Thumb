@@ -8,10 +8,9 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-
-import Separator  from '../components/Separator';
 
 export default function MyGarden({ navigation }) {
   const [plants, setPlants] = useState([]);
@@ -57,12 +56,14 @@ export default function MyGarden({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Updated Header */}
       <View style={styles.header}>
-        <Text style={styles.title}> 🌱 My Garden</Text>
+        <Text style={styles.title}>My Garden</Text>
+        <TouchableOpacity onPress={() => console.log('Settings Pressed')}>
+          <Ionicons name="settings-outline" size={28} color="#333" />
+        </TouchableOpacity>
       </View>
-  
-      <Separator></Separator>
-  
+
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : plants.length === 0 ? (
@@ -81,27 +82,24 @@ export default function MyGarden({ navigation }) {
       )}
     </View>
   );
-  
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
+
   header: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'flex-start', 
-    marginBottom: 8, 
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#fff',
+    elevation: 2,
   },
+
   title: { 
-    fontSize: 30, 
-    fontWeight: '500', 
-    textAlign: 'center', 
-    marginLeft: 10, 
-  },
-  systeicon: {
-    width: 28, 
-    height: 28, 
-    resizeMode: 'contain',
+    fontSize: 22, 
+    fontWeight: 'bold',
   },
 
   noPlantsContainer: {
@@ -110,14 +108,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  
+
   noPlantsText: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#555',
     textAlign: 'center',
   },
-  
+
   noPlantsSubtext: {
     fontSize: 16,
     color: '#777',
@@ -125,7 +123,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },  
 
-  /* Grid Layout */
   row: { justifyContent: 'space-between', marginBottom: 10 },
 
   card: {
