@@ -22,7 +22,6 @@ export default function More({ navigation }) {
     }
   };
 
-  // Open and Close Bottom Drawer
   const openDrawer = () => Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: false }).start();
   const closeDrawer = () => Animated.timing(slideAnim, { toValue: Dimensions.get('screen').height, duration: 300, useNativeDriver: false }).start();
 
@@ -39,10 +38,14 @@ export default function More({ navigation }) {
       {/* Widgets Section */}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.widgetsContainer}>
-          <TouchableOpacity style={styles.widget}>
-            <Ionicons name="wifi-outline" size={40} color="#FFFFFF" />
-            <Text style={styles.widgetText}>Sensors</Text>
-          </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.widget} 
+          onPress={() => navigation.navigate('Sensor')}
+        >
+          <Ionicons name="wifi-outline" size={40} color="#FFFFFF" />
+          <Text style={styles.widgetText}>Sensors</Text>
+        </TouchableOpacity>
+
 
           <TouchableOpacity style={styles.widget}>
             <Ionicons name="alarm-outline" size={40} color="#FFFFFF" />
@@ -61,7 +64,6 @@ export default function More({ navigation }) {
         </View>
       </ScrollView>
 
-      {/* Settings Drawer Component (Sliding from Bottom) */}
       <SettingsDrawer slideAnim={slideAnim} closeDrawer={closeDrawer} user={user} handleLogout={handleLogout} />
     </View>
   );

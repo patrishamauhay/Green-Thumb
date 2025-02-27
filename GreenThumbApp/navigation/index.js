@@ -17,8 +17,7 @@ import UserPlantDetails from '../screens/UserPlantDetails'
 import MyGarden from '../screens/MyGarden'
 import More from '../screens/More'
 import WaterHistory from '../screens/WaterHistory'
-
-
+import Sensor from '../screens/Sensor'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -70,6 +69,7 @@ export default function AppNavigator() {
         <Stack.Screen name="PlantDetails" component={PlantDetails} />
         <Stack.Screen name="UserPlantDetails" component={UserPlantDetails} />
         <Stack.Screen name="WaterHistory" component={WaterHistory} />
+        <Stack.Screen name="Sensor" component={Sensor} />
 
       </Stack.Navigator>
     </NavigationContainer>

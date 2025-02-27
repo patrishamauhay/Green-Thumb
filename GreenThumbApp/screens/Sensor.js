@@ -1,90 +1,98 @@
-        {/* Sensor Configuration Widget 
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-              const [user, setUser] = useState(null);
+export default function SensorScreen({ navigation }) {
   const [sensorId, setSensorId] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('');
-  
-             const handleAssignSensor = () => {
-               if (!sensorId || !selectedPlant) {
-                 Alert.alert('Error', 'Please enter a sensor ID and select a plant.');
-                 return;
-               }
-               Alert.alert('Success', `Sensor ${sensorId} assigned to ${selectedPlant}!`);
-               setSensorId('');
-               setSelectedPlant('');
-             }; 
-            
-                <View style={styles.widgetBox}>
-                  <View style={styles.widgetHeader}>
-                    <Ionicons name="wifi-outline" size={30} color="#2E6F40" />
-                    <Text style={styles.widgetTitle}>Sensor Configuration</Text>
-                  </View>
-                  <Text style={styles.widgetSubtitle}>
-                    Assign a plant from "My Garden" to a soil moisture sensor.
-                  </Text>
-        
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter Sensor ID"
-                    value={sensorId}
-                    onChangeText={setSensorId}
-                  />
-        
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter Plant Name"
-                    value={selectedPlant}
-                    onChangeText={setSelectedPlant}
-                  />
-        
-                  <TouchableOpacity style={styles.assignButton} onPress={handleAssignSensor}>
-                    <Text style={styles.assignButtonText}>Assign Sensor</Text>
-                  </TouchableOpacity>
 
-                  widgetsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  widget: {
-    width: width * 0.4,
-    backgroundColor: '#179b9e',
+  const handleAssignSensor = () => {
+    if (!sensorId.trim() || !selectedPlant.trim()) {
+      Alert.alert('Error', 'Please enter a sensor ID and select a plant.');
+      return;
+    }
+    Alert.alert('Success', `Sensor ${sensorId} assigned to ${selectedPlant}!`);
+    setSensorId('');
+    setSelectedPlant('');
+  };
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Header with Back Button */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back-outline" size={28} color="#333" />
+          </TouchableOpacity>
+          <Ionicons name="wifi-outline" size={30} color="#2E6F40" />
+          <Text style={styles.title}>Sensor Configuration</Text>
+        </View>
+
+        <Text style={styles.subtitle}>
+          Assign a plant from "My Garden" to a soil moisture sensor.
+        </Text>
+
+        {/* Input Fields */}
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Sensor ID"
+          value={sensorId}
+          onChangeText={setSensorId}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Plant Name"
+          value={selectedPlant}
+          onChangeText={setSelectedPlant}
+        />
+
+        {/* Assign Sensor Button */}
+        <TouchableOpacity style={styles.assignButton} onPress={handleAssignSensor}>
+          <Text style={styles.assignButtonText}>Assign Sensor</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </TouchableWithoutFeedback>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
     padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
     justifyContent: 'center',
-    marginBottom: 15,
-    elevation: 3,
   },
-  widgetText: {
-    marginTop: 10,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  widgetBox: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-    elevation: 3,
-  },
-  widgetHeader: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 20,
   },
-  widgetTitle: {
-    fontSize: 18,
+  backButton: {
+    marginRight: 10,
+    padding: 5,
+  },
+  title: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginLeft: 10,
   },
-  widgetSubtitle: {
+  subtitle: {
     fontSize: 14,
     color: '#777',
     marginBottom: 15,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
@@ -108,19 +116,5 @@
     fontSize: 16,
     fontWeight: 'bold',
   },
-                  
-                </View>
-          
+});
 
-
-
-
-
-
-
-
-
-
-
-
-            */}
