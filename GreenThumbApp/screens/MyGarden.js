@@ -47,10 +47,6 @@ export default function MyGarden({ navigation }) {
       {item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.image} />}
       <Text style={styles.name}>{item.userPlantName || 'Unnamed Plant'}</Text>
       <Text style={[styles.scientific, { fontSize: 10 }]}>{item.commonName}</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>💧 {item.watering || 'Unknown'}</Text>
-        <Text style={styles.infoText}>☀️ {item.sunlight || 'Unknown'}</Text>
-      </View>
     </TouchableOpacity>
   );
 
@@ -169,14 +165,5 @@ const styles = StyleSheet.create({
     marginBottom: 5 
   },
 
-  infoContainer: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-around', 
-    width: '100%' 
-  },
 
-  infoText: { 
-    fontSize: 12, 
-    color: '#666' 
-  },
 });

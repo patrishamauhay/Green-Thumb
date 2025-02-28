@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,24 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient'; // Import LinearGradient
+import { colors } from '../constants/theme'; // Import theme colors
+
+const { height, width } = Dimensions.get('screen');
+const sections = ['Notes', 'Care', 'Metrics', 'Plant Info'];
 
 export default function UserPlantDetails({ route, navigation }) {
   const { plantId, docId } = route.params;
   const [plant, setPlant] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState(0);
+  const translateX = useRef(new Animated.Value(0)).current;
   const userId = auth().currentUser?.uid;
 
   useEffect(() => {
@@ -34,28 +43,16 @@ export default function UserPlantDetails({ route, navigation }) {
           }
           setLoading(false);
         });
-
       return unsubscribe;
     }
   }, [userId, plantId]);
 
-  const handleDelete = async () => {
-    Alert.alert('Delete Plant', 'Are you sure you want to remove this plant?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await firestore()
-            .collection('users')
-            .doc(userId)
-            .collection('myGarden')
-            .doc(docId)
-            .delete();
-          navigation.goBack();
-        },
-      },
-    ]);
+  const handleSectionChange = (index) => {
+    setActiveSection(index);
+    Animated.spring(translateX, {
+      toValue: -index * width,
+      useNativeDriver: true,
+    }).start();
   };
 
   if (loading) {
@@ -67,104 +64,90 @@ export default function UserPlantDetails({ route, navigation }) {
     );
   }
 
-  if (!plant) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text>Plant details not available.</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={24} color="black" />
+        <Ionicons name="arrow-back" size={28} color="white" />
       </TouchableOpacity>
 
       {/* Plant Image */}
-      {plant.imageUrl && <Image source={{ uri: plant.imageUrl }} style={styles.image} />}
+      {plant?.imageUrl && <Image source={{ uri: plant.imageUrl }} style={styles.image} />}
 
-      {/* Plant Name & Custom User Name */}
-      <Text style={styles.plantName}>{plant.commonName}</Text>
-      <Text style={styles.userPlantName}>{plant.userPlantName || 'Unnamed Plant'}</Text>
+      {/* Plant Info Section with Tabs */}
+      <LinearGradient
+        colors={[colors.primary, colors.secondary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.infoSection}
+      >
+        <Text style={styles.plantName}>{plant.userPlantName || 'Unnamed Plant'}</Text>
+        <TouchableOpacity>
+          <Ionicons name="settings-outline" size={24} color="white" />
+        </TouchableOpacity>
+      </LinearGradient>
 
-      {/* Water & Sunlight Information */}
-      <View style={styles.infoContainer}>
-        <View style={styles.infoBox}>
-          <Icon name="water-outline" size={24} color="#2196F3" />
-          <Text style={styles.infoText}>{plant.watering || 'Unknown'}</Text>
-          <Text style={styles.infoLabel}>Water</Text>
-        </View>
-
-        <View style={styles.infoBox}>
-          <Icon name="sunny-outline" size={24} color="#FF9800" />
-          <Text style={styles.infoText}>{plant.sunlight || 'Unknown'}</Text>
-          <Text style={styles.infoLabel}>Sunlight</Text>
-        </View>
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        {sections.map((section, index) => (
+          <TouchableOpacity key={index} onPress={() => handleSectionChange(index)}>
+            <Text style={[
+              styles.tabText,
+              activeSection === index ? styles.activeTabText : null,
+            ]}>{section}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* Delete Button */}
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Text style={styles.deleteText}>Delete Plant</Text>
-      </TouchableOpacity>
+      {/* Sliding Sections */}
+      <Animated.View style={[styles.sectionContainer, { transform: [{ translateX }] }]}>
+        <View style={styles.section}><Text style={styles.sectionText}>Notes Content</Text></View>
+        <View style={styles.section}><Text style={styles.sectionText}>Care Content</Text></View>
+        <View style={styles.section}><Text style={styles.sectionText}>Metrics Content</Text></View>
+        <View style={styles.section}><Text style={styles.sectionText}>Plant Info Content</Text></View>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', padding: 16, backgroundColor: '#f5f5f5' },
-
+  container: { flex: 1, backgroundColor: '#121212' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    padding: 10,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 20,
+  backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
+  image: { width: '100%', height: '25%' },
+  infoSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 10,
   },
-
-  image: { width: 150, height: 150, borderRadius: 8, marginTop: 50 },
-
-  plantName: { fontSize: 22, fontWeight: 'bold', marginTop: 10 },
-  userPlantName: {
+  plantName: { fontSize: 18, color: 'white', fontWeight: 'bold' },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    backgroundColor: '#1e1e1e',
+  },
+  tabText: {
     fontSize: 16,
-    color: '#666',
-    marginTop: 5,
-    backgroundColor: '#E3E3E3',
-    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 8,
   },
-
   infoContainer: {
+    borderBottomColor: 'white',
+  sectionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '80%',
     marginTop: 20,
+    width: width * 4,
   },
-
-  infoBox: {
+  section: {
+    width: width,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    padding: 15,
-    borderRadius: 12,
-    elevation: 2,
-    
+    padding: 20,
   },
-
-  infoText: { fontSize: 18, fontWeight: 'bold', marginTop: 5 },
-  infoLabel: { fontSize: 14, color: '#666' },
-
-  deleteButton: {
-    marginTop: 30,
-    backgroundColor: '#D32F2F',
-    padding: 12,
-    borderRadius: 8,
-  },
-
-  deleteText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  sectionText: { fontSize: 18, color: 'white' },
 });

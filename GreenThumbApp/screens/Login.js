@@ -19,7 +19,7 @@ export default function Login({ navigation }) {
       }
     });
 
-    return unsubscribe; // Clean up the listener
+    return unsubscribe;
   }, []);
 
   const handleLogin = async () => {
