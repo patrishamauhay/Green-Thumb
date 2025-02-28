@@ -80,7 +80,7 @@ export default function Home({ navigation }) {
           <Text style={styles.noPlantsText}>No plants added yet!</Text>
         ) : (
           <FlatList
-            data={myGarden.slice(0, 4)} // Show only 4 plants in Quick View
+            data={myGarden.slice(0, 4)}
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}

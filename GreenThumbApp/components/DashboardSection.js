@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const MetricsSection = () => {
+const DashboardSection = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Metrics Content</Text>
+      <Text style={styles.text}>Dashboard Section</Text>
     </View>
   );
 };
@@ -19,4 +19,4 @@ const styles = StyleSheet.create({
   text: { fontSize: 18, color: 'darkgrey' },
 });
 
-export default MetricsSection;
+export default DashboardSection;

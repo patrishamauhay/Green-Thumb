@@ -4,9 +4,9 @@ import Text from "./Text";
 import SettingsDrawer from "./SettingsDrawer";
 import PlantInfoSection from "./PlantInfoSection";
 import CareSection from "./CareSection";
-import MetricsSection from "./MetricsSection";
+import DashboardSection from "./DashboardSection";
 import NotesSection from "./NotesSection";
 
 
 
-export { Block, Button, Text, SettingsDrawer, PlantInfoSection, CareSection, MetricsSection, NotesSection};
+export { Block, Button, Text, SettingsDrawer, PlantInfoSection, CareSection, DashboardSection, NotesSection};

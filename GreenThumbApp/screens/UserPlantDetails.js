@@ -16,14 +16,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import PlantInfoSection from '../components/PlantInfoSection';
 import NotesSection from '../components/NotesSection';
-import MetricsSection from '../components/MetricsSection';
+import DashboardSection from '../components/DashboardSection';
 import CareSection from '../components/CareSection';
 
 
 import { colors } from '../constants/theme'; 
 
 const { height, width } = Dimensions.get('screen');
-const sections = ['Notes', 'Care', 'Metrics', 'Plant Info'];
+const sections = ['Dashboard', 'Care','Plant Info', 'Notes'];
 
 export default function UserPlantDetails({ route, navigation }) {
   const { plantId, docId } = route.params;
@@ -111,10 +111,10 @@ export default function UserPlantDetails({ route, navigation }) {
       </LinearGradient>
 
       <Animated.View style={[styles.sectionContainer, { transform: [{ translateX }] }]}>
-        <NotesSection/>
+        <DashboardSection/>
         <CareSection/>
-        <MetricsSection/>
         <PlantInfoSection />
+        <NotesSection/>
         </Animated.View>
     </View>
   );
