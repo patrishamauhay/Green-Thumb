@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Text, StyleSheet, TouchableOpacity, ScrollView, View, Dimensions, Animated } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, ScrollView, View, Dimensions, Animated, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
 import SettingsDrawer from '../components/SettingsDrawer';
+import LinearGradient from 'react-native-linear-gradient';
+import { colors } from '../constants/theme';
 
 export default function More({ navigation }) {
   const [user, setUser] = useState(null);
@@ -27,25 +29,28 @@ export default function More({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>More Actions</Text>
+      <LinearGradient
+        colors={[colors.primary, colors.secondary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={openDrawer}>
-          <Ionicons name="settings-outline" size={28} color="#333" />
+          <Ionicons name="settings-outline" size={28} color="#FFFFFF" style={styles.iconRight} />
         </TouchableOpacity>
-      </View>
+        <Text style={styles.title}>More Actions</Text>
+      </LinearGradient>
 
       {/* Widgets Section */}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.widgetsContainer}>
-        <TouchableOpacity 
-          style={styles.widget} 
-          onPress={() => navigation.navigate('Sensor')}
-        >
-          <Ionicons name="wifi-outline" size={40} color="#FFFFFF" />
-          <Text style={styles.widgetText}>Sensors</Text>
-        </TouchableOpacity>
-
+          <TouchableOpacity 
+            style={styles.widget} 
+            onPress={() => navigation.navigate('Sensor')}
+          >
+            <Ionicons name="wifi-outline" size={40} color="#FFFFFF" />
+            <Text style={styles.widgetText}>Sensors</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.widget}>
             <Ionicons name="alarm-outline" size={40} color="#FFFFFF" />
@@ -76,18 +81,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-  header: {
+  header: { 
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#fff',
     elevation: 2,
+    width: '100%', 
+    height: '10%'
   },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginLeft: 10,
+  },
+  iconLeft: {
+    marginRight: 10,
   },
   content: {
     paddingHorizontal: 20,

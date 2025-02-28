@@ -11,6 +11,8 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import LinearGradient from 'react-native-linear-gradient';
+import { colors } from '../constants/theme'; 
 
 export default function MyGarden({ navigation }) {
   const [plants, setPlants] = useState([]);
@@ -52,12 +54,18 @@ export default function MyGarden({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient
+        colors={[colors.primary, colors.secondary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header} // Apply gradient here
+      >
         <View style={styles.titleContainer}>
-          <Ionicons name="leaf" size={28} color="#2E7D32" /> 
+          <Ionicons name="leaf" size={28} color="#FFF" /> 
           <Text style={styles.title}> My Garden</Text>
         </View>
-      </View>
+      </LinearGradient>
+
 
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
@@ -90,8 +98,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#fff',
     elevation: 2,
+    width: '100%', 
+    height: '10%'
   },
 
   titleContainer: {
@@ -103,6 +112,7 @@ const styles = StyleSheet.create({
     fontSize: 22, 
     fontWeight: 'bold',
     marginLeft: 8,
+    color: '#FFFFFF',
   },
 
   noPlantsContainer: {
