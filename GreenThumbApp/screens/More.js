@@ -48,22 +48,22 @@ export default function More({ navigation }) {
             style={styles.widget} 
             onPress={() => navigation.navigate('Sensor')}
           >
-            <Ionicons name="wifi-outline" size={40} color="#FFFFFF" />
+            <Ionicons name="wifi-outline" size={40} color="#179b9e" />
             <Text style={styles.widgetText}>Sensors</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="alarm-outline" size={40} color="#FFFFFF" />
+            <Ionicons name="alarm-outline" size={40} color="#179b9e" />
             <Text style={styles.widgetText}>Set Reminder</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="water-outline" size={40} color="#FFFFFF" />
+            <Ionicons name="water-outline" size={40} color="#179b9e" />
             <Text style={styles.widgetText}>Water Tank</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.widget}>
-            <Ionicons name="bulb-outline" size={40} color="#FFFFFF" />
+            <Ionicons name="sunny-outline" size={40} color="#179b9e" />
             <Text style={styles.widgetText}>Light Meter</Text>
           </TouchableOpacity>
         </View>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   widget: {
     width: width * 0.4,
-    backgroundColor: '#179b9e',
+    backgroundColor: '#FFFFFF',
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
   },
   widgetText: {
     marginTop: 10,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#179b9e',
   },
 });
