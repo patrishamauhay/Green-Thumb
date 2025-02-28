@@ -1,4 +1,3 @@
-// just copy this code from the driving repo :)
 import React, { Component } from "react";
 import { Text, StyleSheet } from "react-native";
 
@@ -76,7 +75,7 @@ export default class Typography extends Component {
       white && styles.white,
       gray && styles.gray,
       gray2 && styles.gray2,
-      style // rewrite predefined styles
+      style 
     ];
 
     return (
