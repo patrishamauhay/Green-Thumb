@@ -13,8 +13,14 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import LinearGradient from 'react-native-linear-gradient'; // Import LinearGradient
-import { colors } from '../constants/theme'; // Import theme colors
+import LinearGradient from 'react-native-linear-gradient';
+import PlantInfoSection from '../components/PlantInfoSection';
+import NotesSection from '../components/NotesSection';
+import MetricsSection from '../components/MetricsSection';
+import CareSection from '../components/CareSection';
+
+
+import { colors } from '../constants/theme'; 
 
 const { height, width } = Dimensions.get('screen');
 const sections = ['Notes', 'Care', 'Metrics', 'Plant Info'];
@@ -87,8 +93,13 @@ export default function UserPlantDetails({ route, navigation }) {
         </TouchableOpacity>
       </LinearGradient>
 
-      {/* Tabs */}
-      <View style={styles.tabContainer}>
+      {/* Gradient Tabs */}
+      <LinearGradient
+        colors={[colors.primary, colors.secondary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.tabContainer}
+      >
         {sections.map((section, index) => (
           <TouchableOpacity key={index} onPress={() => handleSectionChange(index)}>
             <Text style={[
@@ -97,50 +108,61 @@ export default function UserPlantDetails({ route, navigation }) {
             ]}>{section}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </LinearGradient>
 
-      {/* Sliding Sections */}
       <Animated.View style={[styles.sectionContainer, { transform: [{ translateX }] }]}>
-        <View style={styles.section}><Text style={styles.sectionText}>Notes Content</Text></View>
-        <View style={styles.section}><Text style={styles.sectionText}>Care Content</Text></View>
-        <View style={styles.section}><Text style={styles.sectionText}>Metrics Content</Text></View>
-        <View style={styles.section}><Text style={styles.sectionText}>Plant Info Content</Text></View>
-      </Animated.View>
+        <NotesSection/>
+        <CareSection/>
+        <MetricsSection/>
+        <PlantInfoSection />
+        </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212' },
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
+  backButton: { 
+    position: 'absolute', 
+    top: 20, 
+    left: 20, 
+    zIndex: 10, 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 30,
+    padding: 5,
+    elevation: 8,
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+  },
   image: { width: '100%', height: '25%' },
   infoSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    borderRadius: 10,
   },
   plantName: { fontSize: 18, color: 'white', fontWeight: 'bold' },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
-    backgroundColor: '#1e1e1e',
   },
   tabText: {
     fontSize: 16,
-    paddingVertical: 4,
-    borderRadius: 8,
+    color: 'white',
+    paddingVertical: 8,
   },
-  infoContainer: {
+  activeTabText: {
+    color: 'white',
+    fontWeight: 'bold',
+    borderBottomWidth: 2,
     borderBottomColor: 'white',
+  },
   sectionContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-    marginTop: 20,
     width: width * 4,
   },
   section: {
@@ -149,5 +171,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  sectionText: { fontSize: 18, color: 'white' },
+  sectionText: { fontSize: 18, color: 'darkgrey' },
 });
