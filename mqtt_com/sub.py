@@ -14,17 +14,33 @@ firebase_admin.initialize_app(cred, {
 # Define MQTT Callbacks
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT Broker with result code {0}".format(rc))
-    client.subscribe("pat_light")  # Subscribe to the MQTT topic
+    client.subscribe("greenthumb")  # Subscribe to the MQTT topic
 
 def on_message(client, userdata, msg):
-    print(f"Message received -> Topic: {msg.topic}, Light Sensor: {str(msg.payload.decode())}")
+    print(f"Message received -> Topic: {msg.topic}, Data: {msg.payload.decode()}")
     
-    # Write to Firebase
-    ref = db.reference("mqtt_data")  # Create a reference to the database node
-    ref.push({  # Push the received data as a new record
-        "topic": msg.topic,
-        "sensordata": msg.payload.decode()  # Convert byte payload to string
-    })
+    # Extract sensor data from the received message
+    try:
+        # Assuming the message follows the format: "Light: XX.X%, Soil: YY.Y%"
+        payload = msg.payload.decode()
+        data_parts = payload.split(", ")  # Split message by comma
+        
+        light_value = float(data_parts[0].split(": ")[1].strip("%"))  # Extract light percentage
+        soil_moisture_value = float(data_parts[1].split(": ")[1].strip("%"))  # Extract soil moisture percentage
+        
+        # Write to Firebase with separate fields
+        ref = db.reference("mqtt_data")  # Reference to the database node
+        ref.push({  
+            "Topic": msg.topic,
+            "Light": light_value,
+            "Soil Moisture": soil_moisture_value
+        })
+        
+        print("Data pushed to Firebase:", {"Topic": msg.topic, "Light": light_value, "Soil Moisture": soil_moisture_value})
+    
+    except Exception as e:
+        print("Error processing message:", e)
+
 
 # Configure MQTT Client
 client = mqtt.Client()

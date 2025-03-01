@@ -1,46 +1,131 @@
 import paho.mqtt.client as mqtt
 import firebase_admin
-from firebase_admin import credentials, db
-import re  # Import regex to extract values
+from firebase_admin import credentials, firestore
+import json
+import time
+from datetime import datetime
 
 # Initialize Firebase
 cred = credentials.Certificate("C:/Users/patri/Documents/Publish-Subscriber/serviceAccountKey.json")
-firebase_admin.initialize_app(cred, {
-    "databaseURL": "https://greenthumb-125c0-default-rtdb.europe-west1.firebasedatabase.app/"
-})
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
-# Define MQTT Callbacks
+# MQTT Configuration
+MQTT_BROKER = "test.mosquitto.org"
+MQTT_TOPIC = "greenthumb"
+
+def get_active_user():
+    """Fetch the user who has activated the sensor."""
+    try:
+        users_ref = db.collection("users").where("activeSensorUser", "!=", None)
+        users_docs = users_ref.get()
+
+        for user_doc in users_docs:
+            return user_doc.id  # Return the user ID who activated the sensor
+
+    except Exception as e:
+        print(f"Error fetching active user: {e}")
+    
+    return None  # No active user found
+
+def get_active_plant(user_id):
+    """Fetch the currently active plant for the user."""
+    try:
+        user_ref = db.collection("users").document(user_id)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            return user_data.get("activeSensorPlant", None)  # ✅ Use .get() to avoid KeyError
+        
+    except Exception as e:
+        print(f"Error fetching active plant for user {user_id}: {e}")
+    
+    return None  # No active plant found
+
+
+def store_sensor_data(user_id, plant_id, light, soil_moisture):
+    """Store sensor data in Firestore."""
+    if not user_id:
+        print("No active user found.")
+        return
+    if not plant_id:
+        print("No plant is assigned to receive sensor data.")
+        return
+
+    try:
+        # Reference to the plant document
+        sensor_ref = db.collection("users").document(user_id).collection("myGarden").document(plant_id)
+
+        # Reference to sensorData subcollection
+        sensor_data_ref = sensor_ref.collection("sensorData")
+
+        # Add a new sensor reading (Firestore auto-generates a unique ID)
+        sensor_data_ref.add({
+            "Light": light,
+            "Soil Moisture": soil_moisture,
+            "timestamp": datetime.utcnow()
+        })
+
+        # Update the latest sensor reading in the main document (optional)
+        sensor_ref.set({
+            "Last Light": light,
+            "Last Soil Moisture": soil_moisture,
+            "Last Updated": datetime.utcnow()
+        }, merge=True)
+
+        print(f"Stored sensor data for plant {plant_id}: Light {light}%, Soil Moisture {soil_moisture}%")
+
+    except Exception as e:
+        print(f"Error storing sensor data: {e}")
+
 def on_connect(client, userdata, flags, rc):
-    print("Connected to MQTT Broker with result code {0}".format(rc))
-    client.subscribe("greenthumb")  # Subscribe to the topic
+    """Handle connection to MQTT broker and subscribe to topic."""
+    if rc == 0:
+        print("Connected to MQTT Broker successfully")
+        client.subscribe(MQTT_TOPIC)  # ✅ Now subscribing to receive data
+    else:
+        print(f"Connection failed with code {rc}")
 
 def on_message(client, userdata, msg):
-    message = msg.payload.decode()
-    print(f"Received -> Topic: {msg.topic}, Data: {message}")
+    """Handle received MQTT messages."""
+    try:
+        payload = json.loads(msg.payload.decode())
+        light = float(payload.get("Light", 0))
+        soil_moisture = float(payload.get("Soil Moisture", 0))
 
-    # Extract Light and Soil Moisture values using regex
-    light_match = re.search(r"Light: (\d+\.\d+)%", message)
-    soil_match = re.search(r"Soil: (\d+\.\d+)%", message)
+        user_id = get_active_user()  # Get the active user
+        if not user_id:
+            print("No user has activated a sensor.")
+            return
 
-    # Convert extracted values to floats
-    light_value = float(light_match.group(1)) if light_match else None
-    soil_value = float(soil_match.group(1)) if soil_match else None
+        plant_id = get_active_plant(user_id)  # Get the active plant
+        if not plant_id:
+            print("No active plant assigned to user.")
+            return
 
-    # Push structured data to Firebase
-    ref = db.reference("mqtt_data")  
-    ref.push({
-        "Topic": msg.topic,
-        "Light": light_value,
-        "Soil Moisture": soil_value
-    })
+        store_sensor_data(user_id, plant_id, light, soil_moisture)  # ✅ Save sensor data to Firestore
 
-# Configure MQTT Client
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
+    except json.JSONDecodeError:
+        print("Received invalid JSON data from MQTT topic")
+    except Exception as e:
+        print(f"Error processing MQTT message: {e}")
 
-# Connect to MQTT broker
-client.connect("test.mosquitto.org", 1883, 60)
+def connect_mqtt():
+    """Handles MQTT connection with auto-reconnect."""
+    global client
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
 
-# Start the MQTT loop
-client.loop_forever()
+    while True:
+        try:
+            print("Attempting to connect to MQTT broker...")
+            client.connect(MQTT_BROKER, 1883, 60)
+            client.loop_forever()
+        except Exception as e:
+            print(f"MQTT Connection Error: {e}, retrying in 5 seconds...")
+            time.sleep(5)
+
+# Start MQTT Connection with Auto-Reconnect
+connect_mqtt()

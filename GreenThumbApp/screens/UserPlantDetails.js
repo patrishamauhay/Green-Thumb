@@ -111,7 +111,7 @@ export default function UserPlantDetails({ route, navigation }) {
       </LinearGradient>
 
       <Animated.View style={[styles.sectionContainer, { transform: [{ translateX }] }]}>
-        <DashboardSection/>
+        <DashboardSection plantId={plantId} docId={docId} />
         <CareSection/>
         <PlantInfoSection />
         <NotesSection/>

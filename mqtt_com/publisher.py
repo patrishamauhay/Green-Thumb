@@ -1,7 +1,3 @@
-# Publisher Code for Micropython
-# ESP32 reads data from sensors, displays it on OLED
-# Publishes data to MQTT broker
-
 import network
 import socket
 import time
@@ -63,28 +59,29 @@ def convert_soil_to_percentage(voltage):
 
 # Function to publish sensor data
 def publish_sensor_data():
+    global client
     try:
         client.connect()
         print("Connected to MQTT broker.")
-
+        
         while True:
-            # Read sensor data
-            raw_light = light_sensor.read_u16()  # Light raw value
-            light_percentage = convert_light_to_percentage(raw_light)  # Convert to %
+            raw_light = light_sensor.read_u16()
+            light_percentage = convert_light_to_percentage(raw_light)
 
-            raw_soil = soil_sensor.read_uv() / 1000000  # Convert microvolts to volts
-            moisture_percentage = convert_soil_to_percentage(raw_soil)  # Convert to %
+            raw_soil = soil_sensor.read_uv() / 1000000
+            moisture_percentage = convert_soil_to_percentage(raw_soil)
 
-            # Display data on OLED
             display_sensor_data(light_percentage, moisture_percentage)
 
-            # Publish formatted data to MQTT
-            message = f"Light: {light_percentage:.1f}%, Soil: {moisture_percentage:.1f}%"
+            message = json.dumps({
+                "Light": round(light_percentage, 2),
+                "Soil Moisture": round(moisture_percentage, 2)
+            })
+
             client.publish(topic, message)
             print(f"Published: {message}")
 
-            time.sleep(5)  # Update every 5 seconds
-
+            time.sleep(5)
     except Exception as e:
         print("Error:", e)
     finally:
