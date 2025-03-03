@@ -29,29 +29,33 @@ class Welcome extends Component {
     const { illustrations } = this.props;
 
     return (
-      <FlatList
-        horizontal
-        pagingEnabled
-        scrollEnabled
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        snapToAlignment="center"
-        data={illustrations}
-        extraDate={this.state}
-        keyExtractor={(item, index) => `${item.id}`}
-        renderItem={({ item }) => (
-          <Image
-            source={item.source}
-            resizeMode="contain"
-            style={{ width, height: height / 2, overflow: "visible" }}
-          />
-        )}
-        onScroll={Animated.event([
+    <FlatList
+      horizontal
+      pagingEnabled
+      scrollEnabled
+      showsHorizontalScrollIndicator={false}
+      scrollEventThrottle={16}
+      snapToAlignment="center"
+      data={illustrations}
+      extraData={this.state}
+      keyExtractor={(item, index) => `${item.id}`}
+      renderItem={({ item }) => (
+        <Image
+          source={item.source}
+          resizeMode="contain"
+          style={{ width, height: height / 2, overflow: "visible" }}
+        />
+      )}
+      onScroll={Animated.event(
+        [
           {
             nativeEvent: { contentOffset: { x: this.scrollX } }
           }
-        ])}
-      />
+        ],
+        { useNativeDriver: false } // ✅ Fix added here
+      )}
+    />
+
     );
   }
 
