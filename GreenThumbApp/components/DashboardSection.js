@@ -3,12 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Switch,
   Alert,
-  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
+import { Circle as ProgressCircle } from "react-native-progress";
 
 const DashboardSection = ({ plantId, docId }) => {
   const [isActivated, setIsActivated] = useState(false);
@@ -22,82 +23,64 @@ const DashboardSection = ({ plantId, docId }) => {
     const userRef = firestore().collection("users").doc(userId);
     const plantRef = userRef.collection("myGarden").doc(docId);
 
-    // Listen for changes in the activated plant and its sensor data
     const unsubscribe = plantRef.onSnapshot((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
-            setIsActivated(data.Activated || false); // ✅ Check if the plant is activated
-            
-            // ✅ Always show the last known sensor data, even if deactivated
-            if (data.latestSensorData) {
-                setSensorData(data.latestSensorData);
-            }
+      if (doc.exists) {
+        const data = doc.data();
+        setIsActivated(data.Activated || false);
+
+        if (data.latestSensorData) {
+          setSensorData(data.latestSensorData);
         }
+      }
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
-}, [userId, docId]); // ✅ Runs when userId or docId changes
+    return () => unsubscribe();
+  }, [userId, docId]);
 
-
-
-const toggleActivation = async () => {
+  const toggleActivation = async () => {
     if (!userId || !docId) {
-        console.error("🚨 Missing userId or docId!");
-        setErrorMessage("Missing userId or plantId.");
-        return;
+      console.error("🚨 Missing userId or docId!");
+      setErrorMessage("Missing userId or plantId.");
+      return;
     }
 
     const userRef = firestore().collection("users").doc(userId);
     const plantRef = userRef.collection("myGarden").doc(docId);
 
     try {
-        const userDoc = await userRef.get();
+      const userDoc = await userRef.get();
 
-        if (!userDoc.exists) {
-            console.warn("⚠️ User document does not exist. Creating...");
-            await userRef.set({ activeSensorPlant: null, activeSensorUser: null }, { merge: true });
+      if (!userDoc.exists) {
+        console.warn("⚠️ User document does not exist. Creating...");
+        await userRef.set({ activeSensorPlant: null, activeSensorUser: null }, { merge: true });
+      }
+
+      const currentlyActivePlant = userDoc.data()?.activeSensorPlant || null;
+
+      if (currentlyActivePlant === docId) {
+        console.log("❌ Deactivating plant...");
+        await userRef.update({ activeSensorPlant: null, activeSensorUser: null });
+        await plantRef.update({ Activated: false });
+        setIsActivated(false);
+      } else {
+        console.log(`✅ Activating plant: ${docId}`);
+        if (currentlyActivePlant) {
+          const previousPlantRef = userRef.collection("myGarden").doc(currentlyActivePlant);
+          await previousPlantRef.update({ Activated: false });
         }
 
-        const currentlyActivePlant = userDoc.data()?.activeSensorPlant || null;
+        await userRef.update({ activeSensorPlant: docId, activeSensorUser: userId });
+        await plantRef.update({ Activated: true });
+        setIsActivated(true);
+      }
 
-        if (currentlyActivePlant === docId) {
-            console.log("❌ Deactivating plant...");
-            
-            // ✅ Deactivate the plant but DO NOT clear the latestSensorData
-            await userRef.update({
-                activeSensorPlant: null,
-                activeSensorUser: null,
-            });
-
-            await plantRef.update({ Activated: false }); // ✅ Keep latestSensorData
-            setIsActivated(false);
-        } else {
-            console.log(`✅ Activating plant: ${docId}`);
-
-            // ✅ First, find the currently active plant and deactivate it
-            if (currentlyActivePlant) {
-                const previousPlantRef = userRef.collection("myGarden").doc(currentlyActivePlant);
-                await previousPlantRef.update({ Activated: false });
-            }
-
-            // ✅ Activate the new plant
-            await userRef.update({
-                activeSensorPlant: docId,
-                activeSensorUser: userId,
-            });
-
-            await plantRef.update({ Activated: true }); // ✅ Set the new plant to active
-            setIsActivated(true);
-        }
-
-        setErrorMessage(null);
+      setErrorMessage(null);
     } catch (error) {
-        console.error("🔥 Firestore Update Error:", error);
-        setErrorMessage("Failed to update activation.");
-        Alert.alert("Error", "Could not update activation. Please try again.");
+      console.error("🔥 Firestore Update Error:", error);
+      setErrorMessage("Failed to update activation.");
+      Alert.alert("Error", "Could not update activation. Please try again.");
     }
-};
-
+  };
 
   return (
     <View style={styles.container}>
@@ -107,54 +90,89 @@ const toggleActivation = async () => {
         {isActivated ? "🌿 Sensor is Activated" : "❌ Sensor is OFF"}
       </Text>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.onButton]}
-          onPress={toggleActivation}
-        >
-          <Text style={styles.buttonText}>Toggle Activation</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Main Wrapper for Sensor Data & Toggle */}
+      <View style={styles.mainContainer}>
+        {/* Progress Circle Container (2/3 width) */}
+        <View style={styles.progressContainer}>
+          <ProgressCircle
+            percent={sensorData?.["Soil Moisture"] || 0}
+            radius={60}
+            borderWidth={8}
+            color="#4CAF50"
+            shadowColor="#ddd"
+            bgColor="#fff"
+          />
+          <Text style={styles.progressText}>
+            {sensorData?.["Soil Moisture"]?.toFixed(1) || "0"}%
+          </Text>
+          <Text style={styles.labelText}>Soil Moisture</Text>
+        </View>
 
-      {/* Sensor Data Section */}
-      {isActivated ? (
-        sensorData ? (
-          <View style={styles.sensorContainer}>
-            <Text style={styles.sensorTitle}>🌱 Latest Sensor Data:</Text>
-            <Text style={styles.sensorText}>💡 Light: {sensorData.Light?.toFixed(2)}%</Text>
-            <Text style={styles.sensorText}>
-              💧 Soil Moisture: {sensorData["Soil Moisture"]?.toFixed(2)}%
+        {/* Toggle Switch Container (1/3 width) */}
+        <View style={styles.toggleContainer}>
+          <Switch
+            value={isActivated}
+            onValueChange={toggleActivation}
+            trackColor={{ false: "#767577", true: "#4CAF50" }}
+            thumbColor={isActivated ? "#FFF" : "#f4f3f4"}
+          />
+          <Text style={styles.toggleText}>
+            {isActivated ? "Activated" : "Deactivated"}
+          </Text>
+
+          {/* Display Last Updated Time */}
+          {sensorData && (
+            <Text style={styles.timestampText}>
+              Last Updated: {new Date(sensorData.timestamp?.toDate()).toLocaleString()}
             </Text>
-          </View>
-        ) : (
-          <Text style={styles.noSensorData}>Waiting for sensor data...</Text>
-        )
-      ) : (
-        <Text style={styles.noSensorData}>Activate sensor to receive data.</Text>
-      )}
+          )}
+        </View>
+      </View>
     </View>
   );
 };
+
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, alignItems: "center" },
   errorText: { color: "red", fontWeight: "bold", marginBottom: 10 },
   statusText: { fontSize: 18, fontWeight: "bold", marginBottom: 20 },
-  buttonContainer: { flexDirection: "row", justifyContent: "center", width: "80%" },
-  button: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 8, marginHorizontal: 5 },
-  onButton: { backgroundColor: "#4CAF50" },
-  buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-  sensorContainer: {
-    marginTop: 20,
-    padding: 15,
-    borderRadius: 10,
-    backgroundColor: "#E3F2FD",
-    width: "90%",
+
+  // Main Sensor Container (Row Layout with 2/3 and 1/3 split)
+  mainContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    width: width * 0.9, // Takes 90% of screen width
+    backgroundColor: "#fff",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  sensorTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 5 },
-  sensorText: { fontSize: 16, color: "#333", marginVertical: 2 },
-  noSensorData: { marginTop: 20, fontSize: 16, color: "#777" },
+
+  // Progress Circle Section (Takes 2/3 of the width)
+  progressContainer: {
+    flex: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressText: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
+  labelText: { fontSize: 14, color: "#666", marginTop: 5 },
+
+  // Toggle Switch Section (Takes 1/3 of the width)
+  toggleContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toggleText: { fontSize: 16, fontWeight: "bold", marginTop: 8 },
+  timestampText: { marginTop: 10, fontSize: 13, color: "#666", textAlign: "center" },
 });
 
 export default DashboardSection;
