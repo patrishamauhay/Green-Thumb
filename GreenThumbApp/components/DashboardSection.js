@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
-import { Circle as ProgressCircle } from "react-native-progress";
+import Svg, { Path, Text as SvgText } from "react-native-svg";
+import { LineChart } from "react-native-chart-kit";
 
 const DashboardSection = ({ plantId, docId }) => {
   const [isActivated, setIsActivated] = useState(false);
   const [sensorData, setSensorData] = useState(null);
+  const [moistureHistory, setMoistureHistory] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
   const userId = auth().currentUser?.uid;
 
@@ -31,6 +33,16 @@ const DashboardSection = ({ plantId, docId }) => {
         if (data.latestSensorData) {
           setSensorData(data.latestSensorData);
         }
+
+        if (Array.isArray(data.sensorHistory)) {
+          const validHistory = data.sensorHistory
+            .filter(entry => Number.isFinite(entry.value))
+            .map(entry => ({ time: entry.time || "", value: entry.value }));
+
+          setMoistureHistory(validHistory);
+        } else {
+          setMoistureHistory([]);
+        }
       }
     });
 
@@ -39,7 +51,6 @@ const DashboardSection = ({ plantId, docId }) => {
 
   const toggleActivation = async () => {
     if (!userId || !docId) {
-      console.error("🚨 Missing userId or docId!");
       setErrorMessage("Missing userId or plantId.");
       return;
     }
@@ -51,19 +62,16 @@ const DashboardSection = ({ plantId, docId }) => {
       const userDoc = await userRef.get();
 
       if (!userDoc.exists) {
-        console.warn("⚠️ User document does not exist. Creating...");
         await userRef.set({ activeSensorPlant: null, activeSensorUser: null }, { merge: true });
       }
 
       const currentlyActivePlant = userDoc.data()?.activeSensorPlant || null;
 
       if (currentlyActivePlant === docId) {
-        console.log("❌ Deactivating plant...");
         await userRef.update({ activeSensorPlant: null, activeSensorUser: null });
         await plantRef.update({ Activated: false });
         setIsActivated(false);
       } else {
-        console.log(`✅ Activating plant: ${docId}`);
         if (currentlyActivePlant) {
           const previousPlantRef = userRef.collection("myGarden").doc(currentlyActivePlant);
           await previousPlantRef.update({ Activated: false });
@@ -76,40 +84,59 @@ const DashboardSection = ({ plantId, docId }) => {
 
       setErrorMessage(null);
     } catch (error) {
-      console.error("🔥 Firestore Update Error:", error);
       setErrorMessage("Failed to update activation.");
       Alert.alert("Error", "Could not update activation. Please try again.");
     }
   };
 
+  const soilMoisture = sensorData?.["Soil Moisture"] || 0;
+  const percentage = Math.min(100, Math.max(0, soilMoisture));
+
+  let arcColor = "#D32F2F";
+  if (percentage > 75) arcColor = "#4CAF50";
+  else if (percentage >= 30 && percentage <= 75) arcColor = "#FFC107";
+
   return (
     <View style={styles.container}>
       {errorMessage && <Text style={styles.errorText}>⚠️ {errorMessage}</Text>}
 
-      <Text style={styles.statusText}>
-        {isActivated ? "🌿 Sensor is Activated" : "❌ Sensor is OFF"}
-      </Text>
-
-      {/* Main Wrapper for Sensor Data & Toggle */}
-      <View style={styles.mainContainer}>
-        {/* Progress Circle Container (2/3 width) */}
-        <View style={styles.progressContainer}>
-          <ProgressCircle
-            percent={sensorData?.["Soil Moisture"] || 0}
-            radius={60}
-            borderWidth={8}
-            color="#4CAF50"
-            shadowColor="#ddd"
-            bgColor="#fff"
-          />
-          <Text style={styles.progressText}>
-            {sensorData?.["Soil Moisture"]?.toFixed(1) || "0"}%
-          </Text>
-          <Text style={styles.labelText}>Soil Moisture</Text>
+      {/* First Row: Soil Moisture + Toggle Switch */}
+      <View style={styles.rowContainer}>
+        {/* Soil Moisture Card */}
+        <View style={styles.card}>
+          <Text style={styles.labelTitle}>Soil Moisture</Text>
+          <View style={styles.progressContainer}>
+            <Svg width={140} height={80} viewBox="0 0 140 80">
+              <Path
+                d="M 10,70 A 50,50 0 0,1 130,70"
+                fill="none"
+                stroke="#ddd"
+                strokeWidth="10"
+                strokeLinecap="round"
+              />
+              <Path
+                d="M 10,70 A 50,50 0 0,1 130,70"
+                fill="none"
+                stroke={arcColor}
+                strokeWidth="10"
+                strokeLinecap="round"
+                strokeDasharray={`${(percentage / 100) * 180}, 200`}
+              />
+              <SvgText x="70" y="45" textAnchor="middle" fontSize="16" fontWeight="bold" fill="#333">
+                {percentage.toFixed(1)}%
+              </SvgText>
+              <SvgText x="10" y="78" textAnchor="middle" fontSize="12" fill="#555">
+                0
+              </SvgText>
+              <SvgText x="130" y="78" textAnchor="middle" fontSize="12" fill="#555">
+                100
+              </SvgText>
+            </Svg>
+          </View>
         </View>
 
-        {/* Toggle Switch Container (1/3 width) */}
-        <View style={styles.toggleContainer}>
+        {/* Toggle Switch Card */}
+        <View style={styles.switchCard}>
           <Switch
             value={isActivated}
             onValueChange={toggleActivation}
@@ -119,14 +146,41 @@ const DashboardSection = ({ plantId, docId }) => {
           <Text style={styles.toggleText}>
             {isActivated ? "Activated" : "Deactivated"}
           </Text>
-
-          {/* Display Last Updated Time */}
-          {sensorData && (
-            <Text style={styles.timestampText}>
-              Last Updated: {new Date(sensorData.timestamp?.toDate()).toLocaleString()}
-            </Text>
-          )}
         </View>
+      </View>
+
+      {/* Second Row: Moisture History Chart */}
+      <View style={styles.chartCard}>
+        <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
+        {moistureHistory.length > 0 ? (
+          <LineChart
+            data={{
+              labels: moistureHistory.map((_, index) => `T${index + 1}`),
+              datasets: [
+                {
+                  data: moistureHistory.map(entry => entry.value),
+                  color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+                  strokeWidth: 3,
+                },
+              ],
+            }}
+            width={width * 0.85}
+            height={220}
+            yAxisSuffix="%"
+            chartConfig={{
+              backgroundColor: "#ffffff",
+              backgroundGradientFrom: "#ffffff",
+              backgroundGradientTo: "#ffffff",
+              decimalPlaces: 1,
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            bezier
+            style={styles.chart}
+          />
+        ) : (
+          <Text style={styles.noDataText}>No moisture data available</Text>
+        )}
       </View>
     </View>
   );
@@ -135,44 +189,44 @@ const DashboardSection = ({ plantId, docId }) => {
 const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, alignItems: "center" },
-  errorText: { color: "red", fontWeight: "bold", marginBottom: 10 },
-  statusText: { fontSize: 18, fontWeight: "bold", marginBottom: 20 },
-
-  // Main Sensor Container (Row Layout with 2/3 and 1/3 split)
-  mainContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: width * 0.9, // Takes 90% of screen width
-    backgroundColor: "#fff",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-
-  // Progress Circle Section (Takes 2/3 of the width)
-  progressContainer: {
-    flex: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  progressText: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
-  labelText: { fontSize: 14, color: "#666", marginTop: 5 },
-
-  // Toggle Switch Section (Takes 1/3 of the width)
-  toggleContainer: {
+  container: {
     flex: 1,
+    paddingVertical: 20,
     alignItems: "center",
-    justifyContent: "center",
   },
-  toggleText: { fontSize: 16, fontWeight: "bold", marginTop: 8 },
-  timestampText: { marginTop: 10, fontSize: 13, color: "#666", textAlign: "center" },
+  errorText: {
+    color: "red",
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: width * 0.9,
+  },
+  card: {
+    width: width * 0.55,
+    height: 160,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  switchCard: {
+    width: width * 0.3,
+    height: 160,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  chartCard: {
+    marginTop: 20,
+    width: width * 0.9,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    alignItems: "center",
+  },
 });
 
 export default DashboardSection;
