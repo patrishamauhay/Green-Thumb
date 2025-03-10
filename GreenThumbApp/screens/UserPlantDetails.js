@@ -112,7 +112,7 @@ export default function UserPlantDetails({ route, navigation }) {
 
       <Animated.View style={[styles.sectionContainer, { transform: [{ translateX }] }]}>
         <DashboardSection plantId={plantId} docId={docId} />
-        <CareSection/>
+        <CareSection speciesId={plant.id} />
         <PlantInfoSection />
         <NotesSection/>
         </Animated.View>
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
   },
-  plantName: { fontSize: 18, color: 'white', fontWeight: 'bold' },
+  plantName: { fontSize: 25, color: 'white', fontWeight: 'bold' },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',

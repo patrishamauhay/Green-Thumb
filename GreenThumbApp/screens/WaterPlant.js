@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator 
 } from 'react-native';
@@ -6,28 +6,85 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import mqtt from 'mqtt/dist/mqtt';  // Import MQTT library (correct path)
+import 'react-native-url-polyfill/auto';  // Import URL polyfill for WebSocket support
+
+const MQTT_BROKER = "ws://test.mosquitto.org:8080"; // WebSocket connection for MQTT
+const TOPIC = "relay_control";  // Original topic from your old code
 
 export default function WaterPlant({ navigation }) {
+  const [lastWatered, setLastWatered] = useState(null);
   const [isWatering, setIsWatering] = useState(false);
-  const [wateringDuration, setWateringDuration] = useState(2);
+  const [wateringDuration, setWateringDuration] = useState(2); // Duration set by the user
+  const [client, setClient] = useState(null);
 
-  // Save only the last watered time
-  const saveWateringTime = async (time) => {
+  // Connect to MQTT broker when the component mounts
+  useEffect(() => {
+    const mqttClient = mqtt.connect(MQTT_BROKER);
+
+    mqttClient.on("connect", () => {
+      console.log("Connected to MQTT broker");
+    });
+
+    mqttClient.on("error", (err) => {
+      console.error("MQTT Error:", err);
+    });
+
+    setClient(mqttClient);
+
+    return () => {
+      mqttClient.end(); // Disconnect when component unmounts
+    };
+  }, []);
+
+  // Load last watering time from AsyncStorage
+  useEffect(() => {
+    loadLastWatered();
+  }, []);
+
+  const loadLastWatered = async () => {
     try {
-      await AsyncStorage.setItem('lastWatered', time);
+      const storedTime = await AsyncStorage.getItem('lastWatered');
+      if (storedTime) {
+        setLastWatered(storedTime);
+      }
     } catch (error) {
-      console.error('Failed to save watering time', error);
+      console.error('Failed to load watering data', error);
+    }
+  };
+
+  // Function to publish MQTT message
+  const sendMQTTMessage = (message) => {
+    if (client) {
+      client.publish(TOPIC, message);
+      console.log(`Sent MQTT Message: ${message}`);
+    } else {
+      console.error("MQTT Client is not connected");
     }
   };
 
   const handleWaterPlant = async () => {
     setIsWatering(true);
+
+    // Send "ON" message to turn on the relay
+    sendMQTTMessage("ON");
+
     setTimeout(async () => {
+      // Send "OFF" message to turn off the relay after the set watering duration
+      sendMQTTMessage("OFF");
+
       const now = new Date().toLocaleString();
-      await saveWateringTime(now);
-      Alert.alert('Success', `Your plant has been watered for ${wateringDuration} seconds!`);
+      setLastWatered(now);
+
+      try {
+        await AsyncStorage.setItem('lastWatered', now);
+        Alert.alert('Success', `Your plant has been watered for ${wateringDuration} seconds!`);
+      } catch (error) {
+        console.error('Failed to save watering data', error);
+      }
+
       setIsWatering(false);
-    }, wateringDuration * 1000);
+    }, wateringDuration * 1000); // Delay based on the user-selected watering duration
   };
 
   return (
@@ -157,6 +214,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginTop: 5,
+  },
+
+  infoContainer: {
+    padding: 15,
+    backgroundColor: '#E3F2E1',
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+
+  infoText: {
+    fontSize: 16,
+    color: '#333',
   },
 
   sliderContainer: {

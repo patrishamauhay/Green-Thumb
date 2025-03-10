@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
-import Svg, { Path, Text as SvgText } from "react-native-svg";
+import Svg, { Path, Text as SvgText, Defs, LinearGradient, Stop } from "react-native-svg";
 import { LineChart } from "react-native-chart-kit";
 
 const DashboardSection = ({ plantId, docId }) => {
@@ -100,35 +100,56 @@ const DashboardSection = ({ plantId, docId }) => {
     <View style={styles.container}>
       {errorMessage && <Text style={styles.errorText}>⚠️ {errorMessage}</Text>}
 
-      {/* First Row: Soil Moisture + Toggle Switch */}
       <View style={styles.rowContainer}>
         {/* Soil Moisture Card */}
         <View style={styles.card}>
           <Text style={styles.labelTitle}>Soil Moisture</Text>
           <View style={styles.progressContainer}>
-            <Svg width={140} height={80} viewBox="0 0 140 80">
+            <Svg width={150} height={90} viewBox="0 0 150 90">
+              {/* Background Arc */}
               <Path
-                d="M 10,70 A 50,50 0 0,1 130,70"
+                d="M 10,80 A 60,60 0 0,1 140,80"
                 fill="none"
-                stroke="#ddd"
+                stroke="#E0E0E0"
                 strokeWidth="10"
                 strokeLinecap="round"
               />
+
+              {/* Gradient Arc */}
+              <Defs>
+                <LinearGradient id="gradient" x1="0" y1="0" x2="1" y2="0">
+                  <Stop offset="0%" stopColor={arcColor} stopOpacity="1" />
+                  <Stop offset="100%" stopColor="#E0E0E0" stopOpacity="0.5" />
+                </LinearGradient>
+              </Defs>
+
               <Path
-                d="M 10,70 A 50,50 0 0,1 130,70"
+                d="M 10,80 A 60,60 0 0,1 140,80"
                 fill="none"
-                stroke={arcColor}
+                stroke="url(#gradient)"
                 strokeWidth="10"
                 strokeLinecap="round"
                 strokeDasharray={`${(percentage / 100) * 180}, 200`}
+                strokeDashoffset="0"
               />
-              <SvgText x="70" y="45" textAnchor="middle" fontSize="16" fontWeight="bold" fill="#333">
+
+              {/* Percentage Text */}
+              <SvgText
+                x="75"
+                y="50"
+                textAnchor="middle"
+                fontSize="18"
+                fontWeight="bold"
+                fill="#333"
+              >
                 {percentage.toFixed(1)}%
               </SvgText>
-              <SvgText x="10" y="78" textAnchor="middle" fontSize="12" fill="#555">
+
+              {/* Min/Max Labels */}
+              <SvgText x="10" y="85" textAnchor="middle" fontSize="12" fill="#777">
                 0
               </SvgText>
-              <SvgText x="130" y="78" textAnchor="middle" fontSize="12" fill="#555">
+              <SvgText x="140" y="85" textAnchor="middle" fontSize="12" fill="#777">
                 100
               </SvgText>
             </Svg>
@@ -151,41 +172,42 @@ const DashboardSection = ({ plantId, docId }) => {
 
       {/* Moisture History Chart */}
       <View style={styles.chartCard}>
-      <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
-      <LineChart
-        data={{
-          labels: moistureHistory.length > 0 
-            ? moistureHistory.map((_, index) => `T${index + 1}`) 
-            : ['T1', 'T2', 'T3', 'T4', 'T5'], // Placeholder labels
+        <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
+        <LineChart
+  data={{
+    labels: moistureHistory.length > 0
+      ? moistureHistory.map((_, index) => `T${index + 1}`)
+      : ['T1', 'T2', 'T3', 'T4', 'T5'],
+    datasets: [
+      {
+        data: moistureHistory.length > 0
+          ? moistureHistory.map(entry => entry.value)
+          : [0, 0, 0, 0, 0],
+        color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`, // ✅ Define color function
+        strokeWidth: 3,
+      },
+    ],
+  }}
+  width={width * 0.85}
+  height={220}
+  yAxisSuffix="%"
+  chartConfig={{
+    backgroundColor: "#ffffff",
+    backgroundGradientFrom: "#ffffff",
+    backgroundGradientTo: "#ffffff",
+    decimalPlaces: 1,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define color function
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define labelColor function
+    propsForDots: {
+      r: "4",
+      strokeWidth: "2",
+      stroke: "#4CAF50",
+    },
+  }}
+  bezier
+/>
 
-          datasets: [
-            {
-              data: moistureHistory.length > 0 
-                ? moistureHistory.map(entry => entry.value) 
-                : [0, 0, 0, 0, 0], // Placeholder data points
-
-              color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
-              strokeWidth: 3,
-            },
-          ],
-        }}
-        width={width * 0.85}
-        height={220}
-        yAxisSuffix="%"
-        chartConfig={{
-          backgroundColor: "#ffffff",
-          backgroundGradientFrom: "#ffffff",
-          backgroundGradientTo: "#ffffff",
-          decimalPlaces: 1,
-          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-        }}
-        bezier
-        style={styles.chart}
-      />
-    
-    </View>
-
+      </View>
     </View>
   );
 };
@@ -196,15 +218,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: 20,
-    paddingLeft: 20, // Pushes content to the right
-    alignItems: "flex-end", // Align items to the right
+    paddingHorizontal: 20,
+    alignItems: "center",
   },
   rowContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end", // Moves content to the right
+    justifyContent: "center",
     alignItems: "center",
     width: width * 0.9,
-    marginLeft: 20, // Push content right
   },
   card: {
     width: width * 0.55,
@@ -218,7 +239,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
-    marginLeft: 20, // Push this card right
   },
   switchCard: {
     width: width * 0.3,
@@ -231,7 +251,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
-    marginLeft: 20, // Push switch card right
+    marginLeft: 10,
   },
   chartCard: {
     marginTop: 20,
@@ -244,9 +264,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
-    marginLeft: 20, // Push chart right
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginBottom: 10,
   },
 });
-
 
 export default DashboardSection;

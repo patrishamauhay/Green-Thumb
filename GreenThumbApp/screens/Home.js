@@ -109,7 +109,8 @@ export default function Home({ navigation }) {
         )}
       </View>
       <View style={styles.waterContainer}>
-        <Text style={styles.sectionTitle}>🚰 Water Tank Level</Text>
+        <Text style={styles.sectionTitle} iconName = 'water-outline'>    
+        Water Tank Level</Text>
         <WaterLevelChart value={75} />
       </View>
 
