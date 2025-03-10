@@ -14,6 +14,8 @@ import {
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import WaterLevelChart from '../components/WaterLevelChart';
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -106,6 +108,11 @@ export default function Home({ navigation }) {
           />
         )}
       </View>
+      <View style={styles.waterContainer}>
+        <Text style={styles.sectionTitle}>🚰 Water Tank Level</Text>
+        <WaterLevelChart value={75} />
+      </View>
+
     
     </ScrollView>
   );
@@ -160,6 +167,15 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   gardenContainer: {
+    marginTop: 20,
+    backgroundColor: '#FFFFFF',
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 15,
+    marginHorizontal: 16,
+    elevation: 2,
+  },
+  waterContainer: {
     marginTop: 20,
     backgroundColor: '#FFFFFF',
     padding: 15,

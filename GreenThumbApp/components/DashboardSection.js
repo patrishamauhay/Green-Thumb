@@ -192,18 +192,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: 20,
-    alignItems: "center",
-  },
-  errorText: {
-    color: "red",
-    fontWeight: "bold",
-    marginBottom: 10,
+    paddingLeft: 20, // Pushes content to the right
+    alignItems: "flex-end", // Align items to the right
   },
   rowContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end", // Moves content to the right
     alignItems: "center",
     width: width * 0.9,
+    marginLeft: 20, // Push content right
   },
   card: {
     width: width * 0.55,
@@ -212,6 +209,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 20,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
+    marginLeft: 20, // Push this card right
   },
   switchCard: {
     width: width * 0.3,
@@ -219,6 +222,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
+    marginLeft: 20, // Push switch card right
   },
   chartCard: {
     marginTop: 20,
@@ -226,7 +235,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
+    marginLeft: 20, // Push chart right
   },
 });
+
 
 export default DashboardSection;
