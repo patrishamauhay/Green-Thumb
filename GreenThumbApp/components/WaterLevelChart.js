@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import Svg, { Circle, Text as SvgText } from 'react-native-svg';
 
 const WaterLevelChart = ({ value = 75 }) => {
-  const size = 120; // Size of the chart
-  const strokeWidth = 10;
+  const size = 140; // Size of the chart
+  const strokeWidth = 14; // Thicker stroke for better look
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = circumference - (value / 100) * circumference;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.chartContainer}>
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Background Circle */}
         <Circle
@@ -34,7 +30,7 @@ const WaterLevelChart = ({ value = 75 }) => {
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
-          strokeDashoffset={progress} // Adjusted by value
+          strokeDashoffset={progress}
           strokeLinecap="round"
           rotation="-90"
           origin={`${size / 2}, ${size / 2}`} // Start from top
@@ -56,9 +52,9 @@ const WaterLevelChart = ({ value = 75 }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  chartContainer: {
+    alignItems: 'center', // Centers horizontally
+    justifyContent: 'center', // Centers vertically
   },
 });
 

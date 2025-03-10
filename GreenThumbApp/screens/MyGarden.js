@@ -51,7 +51,12 @@ export default function MyGarden({ navigation }) {
 
       {/* Plant Info */}
       <View style={styles.textContainer}>
-        <Text style={styles.name}>{item.userPlantName || 'Unnamed Plant'}</Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>{item.userPlantName || 'Unnamed Plant'}</Text>
+
+          {/* Green Dot for Active Plant */}
+          {item.Activated && <View style={styles.greenDot} />}
+        </View>
         <Text style={styles.scientific}>{item.commonName}</Text>
       </View>
     </TouchableOpacity>
@@ -150,7 +155,6 @@ const styles = StyleSheet.create({
   },
 
   /* Plant Item Card */
-  /* Plant Item Card */
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,7 +171,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
 
-
   /* Plant Image */
   image: { 
     width: 100, 
@@ -181,16 +184,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
   name: { 
     fontSize: 20, 
     fontWeight: 'bold', 
     color: '#333',
   },
 
+  /* Green Dot for Active Plant */
+  greenDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#4CAF50',
+    marginLeft: 8, // Add spacing from plant name
+  },
+
   scientific: { 
     fontSize: 16, 
     color: '#777', 
   },
-
 });
-
