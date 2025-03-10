@@ -15,7 +15,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WaterLevelChart from '../components/WaterLevelChart';
-
+import VoiceControlButton from '../components/VoiceControlButton'; // Import the VoiceControlButton
 
 const { width, height } = Dimensions.get("window");
 
@@ -25,11 +25,11 @@ export default function Home({ navigation }) {
   const [loading, setLoading] = useState(true);
   const userId = auth().currentUser?.uid;
 
-
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(setUser);
     return () => unsubscribe();
   }, []);
+  
   useEffect(() => {
     if (userId) {
       const unsubscribe = firestore()
@@ -98,7 +98,6 @@ export default function Home({ navigation }) {
                   style={styles.imageBackground} 
                   imageStyle={{ borderRadius: 10 }}
                 >
-                  {/* Plant Name Overlay */}
                   <View style={styles.nameOverlay}>
                     <Text style={styles.plantName}>{item.userPlantName || 'Unnamed Plant'}</Text>
                   </View>
@@ -108,11 +107,17 @@ export default function Home({ navigation }) {
           />
         )}
       </View>
+
+      <View style={styles.quickAccessContainer}>
+        <VoiceControlButton />
+      </View>
+      
+      {/* Water Tank Level Section */}
       <View style={styles.waterContainer}>
-        <Text style={styles.sectionTitle} iconName = 'water-outline'>    
-        Water Tank Level</Text>
+        <Text style={styles.sectionTitle}>Water Tank Level</Text>
         <WaterLevelChart value={75} />
       </View>
+
 
     
     </ScrollView>
@@ -124,17 +129,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#F5F5F5',
   },
-
   headerContainer: {
     alignItems: 'center',
     position: 'relative',
   },
-
   backgroundImage: {
     width: width,
     height: height * 0.35,
   },
-
   welcomeText: {
     position: 'absolute',
     top: '6%',
@@ -143,12 +145,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginRight: 130,
   },
-
   searchBarContainer: {
     alignItems: 'center',
     marginTop: 15,
   },
-
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -158,11 +158,9 @@ const styles = StyleSheet.create({
     width: '90%',
     elevation: 2,
   },
-
   searchIcon: {
     marginRight: 10,
   },
-
   searchPlaceholder: {
     fontSize: 16,
     color: '#888',
@@ -185,13 +183,22 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     elevation: 2,
   },
+  quickAccessContainer: {
+    marginTop: 20,
+    backgroundColor: '#FFFFFF',
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 15,
+    marginHorizontal: 16,
+    elevation: 2,
+    alignItems: 'center',
+  },
   sectionTitle: {
     fontSize: 20, 
     fontWeight: 'bold',
     color: '#888',
     marginBottom: 10,
   },
-
   noPlantsText: {
     fontSize: 16,
     color: '#fff',
@@ -224,6 +231,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFF',
   },
-
 });
- 
