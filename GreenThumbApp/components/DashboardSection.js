@@ -149,39 +149,43 @@ const DashboardSection = ({ plantId, docId }) => {
         </View>
       </View>
 
-      {/* Second Row: Moisture History Chart */}
+      {/* Moisture History Chart */}
       <View style={styles.chartCard}>
-        <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
-        {moistureHistory.length > 0 ? (
-          <LineChart
-            data={{
-              labels: moistureHistory.map((_, index) => `T${index + 1}`),
-              datasets: [
-                {
-                  data: moistureHistory.map(entry => entry.value),
-                  color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
-                  strokeWidth: 3,
-                },
-              ],
-            }}
-            width={width * 0.85}
-            height={220}
-            yAxisSuffix="%"
-            chartConfig={{
-              backgroundColor: "#ffffff",
-              backgroundGradientFrom: "#ffffff",
-              backgroundGradientTo: "#ffffff",
-              decimalPlaces: 1,
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            }}
-            bezier
-            style={styles.chart}
-          />
-        ) : (
-          <Text style={styles.noDataText}>No moisture data available</Text>
-        )}
-      </View>
+      <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
+      <LineChart
+        data={{
+          labels: moistureHistory.length > 0 
+            ? moistureHistory.map((_, index) => `T${index + 1}`) 
+            : ['T1', 'T2', 'T3', 'T4', 'T5'], // Placeholder labels
+
+          datasets: [
+            {
+              data: moistureHistory.length > 0 
+                ? moistureHistory.map(entry => entry.value) 
+                : [0, 0, 0, 0, 0], // Placeholder data points
+
+              color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+              strokeWidth: 3,
+            },
+          ],
+        }}
+        width={width * 0.85}
+        height={220}
+        yAxisSuffix="%"
+        chartConfig={{
+          backgroundColor: "#ffffff",
+          backgroundGradientFrom: "#ffffff",
+          backgroundGradientTo: "#ffffff",
+          decimalPlaces: 1,
+          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+        }}
+        bezier
+        style={styles.chart}
+      />
+    
+    </View>
+
     </View>
   );
 };
