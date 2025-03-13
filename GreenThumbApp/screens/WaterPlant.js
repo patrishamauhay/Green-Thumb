@@ -161,7 +161,6 @@ export default function WaterPlant({ navigation }) {
       </TouchableOpacity>
 
       <ScheduleWater onScheduleSet={(date) => console.log(`Scheduled at: ${date}`)} />
-        
     </LinearGradient>
   );
 }

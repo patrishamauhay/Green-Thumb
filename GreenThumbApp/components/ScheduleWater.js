@@ -28,6 +28,11 @@ export default function ScheduleWater({ onScheduleSet }) {
 
   // Handle Date Selection
   const handleDateConfirm = (event, selectedDate) => {
+    if (event.type === 'dismissed') {
+      setShowDatePicker(false);
+      return; // Cancel if dismissed
+    }
+
     setShowDatePicker(false);
     if (selectedDate) {
       setTempDate(selectedDate);
@@ -37,6 +42,11 @@ export default function ScheduleWater({ onScheduleSet }) {
 
   // Handle Time Selection
   const handleTimeConfirm = async (event, selectedTime) => {
+    if (event.type === 'dismissed') {
+      setShowTimePicker(false);
+      return; // Cancel if dismissed
+    }
+
     setShowTimePicker(false);
     if (selectedTime) {
       const combinedDate = new Date(
@@ -64,6 +74,17 @@ export default function ScheduleWater({ onScheduleSet }) {
     setShowDatePicker(true);
   };
 
+  const formatDateTime = (date) => {
+    return new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(date);
+  };
+
   const renderPickers = () => (
     <>
       {showDatePicker && (
@@ -71,7 +92,7 @@ export default function ScheduleWater({ onScheduleSet }) {
           value={tempDate}
           mode="date"
           display="default"
-          onChange={handleDateConfirm}
+          onChange={handleDateConfirm} // Handle cancel here
         />
       )}
 
@@ -80,7 +101,7 @@ export default function ScheduleWater({ onScheduleSet }) {
           value={tempDate}
           mode="time"
           display="default"
-          onChange={handleTimeConfirm}
+          onChange={handleTimeConfirm} // Handle cancel here
         />
       )}
     </>
@@ -91,7 +112,7 @@ export default function ScheduleWater({ onScheduleSet }) {
       {/* Display Next Scheduled Time */}
       <Text style={styles.statusText}>
         {isScheduled
-          ? `Next watering: ${scheduledTime?.toLocaleString()}`
+          ? `Next watering: ${formatDateTime(scheduledTime)}`
           : 'No schedule set'}
       </Text>
 
