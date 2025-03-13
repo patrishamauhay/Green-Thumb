@@ -9,6 +9,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import mqtt from 'mqtt/dist/mqtt';  // Import MQTT library (correct path)
 import 'react-native-url-polyfill/auto';  // Import URL polyfill for WebSocket support
 
+import ScheduleWater from '../components/ScheduleWater';
+
 const MQTT_BROKER = "ws://test.mosquitto.org:8080"; // WebSocket connection for MQTT
 const TOPIC = "relay_control";  // Original topic from your old code
 
@@ -157,7 +159,9 @@ export default function WaterPlant({ navigation }) {
       >
         <Text style={styles.buttonText}>VIEW HISTORY</Text>
       </TouchableOpacity>
-    
+
+      <ScheduleWater onScheduleSet={(date) => console.log(`Scheduled at: ${date}`)} />
+        
     </LinearGradient>
   );
 }

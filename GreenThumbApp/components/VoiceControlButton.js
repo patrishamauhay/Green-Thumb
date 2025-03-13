@@ -1,50 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
-import Voice from '@react-native-voice/voice'; // Import voice library
 
 export default function VoiceControlButton() {
   const [isListening, setIsListening] = useState(false);
 
-  // Initialize voice commands
-  useEffect(() => {
-    Voice.onSpeechResults = onSpeechResults;
-    Voice.onSpeechError = onSpeechError;
+  // Simulate the action to test the button
+  const handlePress = () => {
+    Alert.alert('Button Pressed', 'Testing button without voice recognition');
+    setIsListening(true);
 
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
-
-  const onSpeechResults = (event) => {
-    const results = event.value;
-    if (results && results[0].toLowerCase().includes('water my plant')) {
-      Alert.alert('Voice Command', 'Watering the plant...');
-      // Add your watering function here
-    }
-  };
-
-  const onSpeechError = (error) => {
-    console.error('Speech error:', error);
-  };
-
-  // Start listening for voice commands
-  const startListening = async () => {
-    try {
-      await Voice.start('en-US');
-      setIsListening(true);
-    } catch (error) {
-      console.error('Error starting voice recognition:', error);
-    }
+    // Reset state after 2 seconds
+    setTimeout(() => setIsListening(false), 2000);
   };
 
   return (
     <TouchableOpacity 
       style={styles.button}
-      onPress={startListening}
+      onPress={handlePress}
       disabled={isListening}
     >
       <Text style={styles.buttonText}>
-        {isListening ? 'Listening...' : 'Start Voice Command'}
+        {isListening ? 'Listening...' : 'Start Test'}
       </Text>
     </TouchableOpacity>
   );
