@@ -114,7 +114,7 @@ export default function UserPlantDetails({ route, navigation }) {
         <DashboardSection plantId={plantId} docId={docId} />
         <CareSection speciesId={plant.id} />
         <PlantInfoSection />
-        <NotesSection/>
+        <NotesSection plantId={plantId} />
         </Animated.View>
     </View>
   );
