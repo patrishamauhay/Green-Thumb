@@ -9,6 +9,9 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Modal,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
@@ -20,6 +23,7 @@ const NotesSection = ({ plantId }) => {
   const [images, setImages] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     loadHistory();
@@ -85,6 +89,8 @@ const NotesSection = ({ plantId }) => {
       setNotes('');
       setImages([]);
       loadHistory(); // Refresh history after saving
+      setModalVisible(false);
+
     } catch (error) {
       console.error('Error saving snap history:', error);
       Alert.alert('Error', 'Failed to save note.');
@@ -156,6 +162,7 @@ const NotesSection = ({ plantId }) => {
         {/* ✅ Text Input */}
         <TextInput
           style={styles.input}
+          onPress={() => setModalVisible(true)}
           placeholder="Record your plant’s progress!"
           placeholderTextColor="#999"
           value={notes}
@@ -168,9 +175,47 @@ const NotesSection = ({ plantId }) => {
           <Ionicons name="camera-outline" size={28} color="#999" />
         </TouchableOpacity>
       </View>
+       {/* ✅ Full Screen Modal */}
+       <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalContainer}
+        >
+          <View style={styles.modalContent}>
+            {/* ✅ Header */}
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave}>
+                <Text style={styles.doneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
 
-      <TouchableOpacity style={styles.recordButton} onPress={handleSave}>
-      </TouchableOpacity>
+            {/* ✅ Notes */}
+            <Text style={styles.label}>Notes</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Record your plant’s progress!"
+              value={notes}
+              onChangeText={setNotes}
+              multiline
+            />
+
+            {/* ✅ Image Upload */}
+            <Text style={styles.label}>Add Images ({images.length}/3)</Text>
+            <TouchableOpacity onPress={handleAddImage} style={styles.imageUpload}>
+              <Ionicons name="add" size={30} color="#999" />
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
     </View>
   );
 };
@@ -247,7 +292,47 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'flex-start',
+  },
+  modalContent: {
+    padding: 20,
+    marginTop: 50, // Slide to top
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 25,
+  },
+  cancelText: {
+    color: '#007AFF',
+    fontSize: 16,
+  },
+  doneText: {
+    color: '#007AFF',
+    fontSize: 16,
+  },
+  label: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  modalInput: {
+    backgroundColor: '#F9F9F9',
+    padding: 10,
+    borderRadius: 8,
+  },
+  imageUpload: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#F4F4F4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
 });
 
 export default NotesSection;
