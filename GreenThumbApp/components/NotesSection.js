@@ -13,10 +13,12 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import RNFS from 'react-native-fs';
 
 const NotesSection = ({ plantId }) => {
   const [notes, setNotes] = useState('');
@@ -58,65 +60,200 @@ const NotesSection = ({ plantId }) => {
     }
   };
 
+  // ✅ Upload to Firebase Storage and get the download URL
+  const uploadImage = async (uri) => {
+    try {
+      if (!uri || typeof uri !== 'string') { // Ensure uri is valid and a string
+        console.error('Invalid URI:', uri);
+        Alert.alert('Error', 'Invalid file URI');
+        return null;
+      }
+  
+      let path = uri;
+  
+      // ✅ Handle content:// URIs correctly
+      if (uri.startsWith('content://')) {
+        const newPath = `${RNFS.TemporaryDirectoryPath}/${Date.now()}.jpg`;
+        await RNFS.copyFile(uri, newPath);
+        path = `file://${newPath}`;
+      }
+  
+      // ✅ Double-check that path is a string before proceeding
+      if (!path || typeof path !== 'string') {
+        console.error('Path is null or not a string:', path);
+        Alert.alert('Error', 'Invalid file path');
+        return null;
+      }
+  
+      // ✅ Ensure path exists before proceeding
+      const fileExists = await RNFS.exists(path);
+      if (!fileExists) {
+        console.error('File does not exist at path:', path);
+        Alert.alert('Error', 'File not found');
+        return null;
+      }
+  
+      console.log('Uploading file at path:', path);
+  
+      // ✅ Extract filename from valid path
+      const filename = path.substring(path.lastIndexOf('/') + 1);
+      const reference = storage().ref(`snapHistory/${filename}`);
+  
+      console.log('Uploading to Firebase Storage:', filename);
+  
+      await reference.putFile(path);
+  
+      const url = await reference.getDownloadURL();
+      console.log('Upload successful. URL:', url);
+      return url;
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      Alert.alert('Error', 'Failed to upload image');
+      return null;
+    }
+  };
+  
+
   // ✅ Handle adding notes and images to Firestore
   const handleSave = async () => {
+    if (!plantId) {
+      Alert.alert('Error', 'Invalid plant ID');
+      return;
+    }
+  
     if (!notes.trim() && images.length === 0) {
       Alert.alert('Error', 'Please add notes or an image');
       return;
     }
-
+  
     try {
       const userId = auth().currentUser?.uid;
       if (!userId) {
         Alert.alert('Error', 'You need to be logged in');
         return;
       }
-
+  
+      console.log('User ID:', userId);
+      console.log('Plant ID:', plantId);
+      console.log('Notes:', notes);
+  
+      // ✅ Remove images field if empty
       const newEntry = {
-        notes,
-        images,
-        createdAt: firestore.FieldValue.serverTimestamp(),
+        notes: typeof notes === 'string' ? notes.trim() : '',
+        createdAt: firestore.Timestamp.now(),
       };
-
-      await firestore()
+  
+      if (images.length > 0) {
+        newEntry.images = images;
+      }
+  
+      console.log('Saving data:', newEntry);
+  
+      const docPath = `users/${userId}/myGarden/${plantId}/snapHistory`;
+      console.log('Firestore path:', docPath);
+  
+      const docRef = await firestore()
         .collection('users')
         .doc(userId)
         .collection('myGarden')
         .doc(plantId)
         .collection('snapHistory')
         .add(newEntry);
-
+  
+      console.log('Successfully saved note with ID:', docRef.id);
+  
       setNotes('');
       setImages([]);
       loadHistory(); // Refresh history after saving
       setModalVisible(false);
-
+  
     } catch (error) {
       console.error('Error saving snap history:', error);
-      Alert.alert('Error', 'Failed to save note.');
+      Alert.alert('Error', `Failed to save note: ${error.message}`);
     }
   };
-
+  
   // ✅ Open camera or gallery to add an image
   const handleAddImage = async () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 0.8,
-      },
-      (response) => {
-        if (response.didCancel) return;
-        if (response.errorCode) {
-          Alert.alert('Error', response.errorMessage);
-          return;
-        }
-
-        if (response.assets) {
-          setImages([...images, ...response.assets.map((asset) => asset.uri)]);
-        }
-      }
+    Alert.alert(
+      'Add Image',
+      'Choose an option:',
+      [
+        {
+          text: 'Take Photo',
+          onPress: () => openCamera(),
+        },
+        {
+          text: 'Choose from Library',
+          onPress: () => openLibrary(),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
     );
   };
+  
+  const openCamera = async () => {
+  launchCamera(
+    {
+      mediaType: 'photo',
+      quality: 0.8,
+      saveToPhotos: true,
+    },
+    async (response) => {
+      if (response.didCancel) return;
+      if (response.errorCode) {
+        Alert.alert('Error', response.errorMessage);
+        return;
+      }
+
+      if (response.assets && response.assets[0]?.uri) {
+        const uri = response.assets[0].uri;
+
+        // ✅ Upload image and get download URL
+        const downloadUrl = await uploadImage(uri);
+        if (downloadUrl) {
+          setImages((prevImages) => [...prevImages, downloadUrl]); // Save download URL to state
+        }
+      } else {
+        console.error('Invalid image response:', response);
+      }
+    }
+  );
+};
+
+const openLibrary = async () => {
+  launchImageLibrary(
+    {
+      mediaType: 'photo',
+      quality: 0.8,
+    },
+    async (response) => {
+      if (response.didCancel) return;
+      if (response.errorCode) {
+        Alert.alert('Error', response.errorMessage);
+        return;
+      }
+
+      if (response.assets && response.assets[0]?.uri) {
+        const uri = response.assets[0].uri;
+
+        // ✅ Upload image and get download URL
+        const downloadUrl = await uploadImage(uri);
+        if (downloadUrl) {
+          setImages((prevImages) => [...prevImages, downloadUrl]); // Save download URL to state
+        }
+      } else {
+        console.error('Invalid image response:', response);
+      }
+    }
+  );
+};
+
+
 
   // ✅ Render history in a timeline format
   const renderHistory = () => {
@@ -171,12 +308,14 @@ const NotesSection = ({ plantId }) => {
         />
 
         {/* ✅ Camera Button */}
-        <TouchableOpacity onPress={handleAddImage} style={styles.cameraButton}>
-          <Ionicons name="camera-outline" size={28} color="#999" />
-        </TouchableOpacity>
+      <TouchableOpacity onPress={openCamera} style={styles.cameraButton}>
+        <Ionicons name="camera-outline" size={28} color="#999" />
+      </TouchableOpacity>
+
       </View>
-       {/* ✅ Full Screen Modal */}
-       <Modal
+
+      {/* ✅ Full Screen Modal */}
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -215,7 +354,6 @@ const NotesSection = ({ plantId }) => {
           </View>
         </KeyboardAvoidingView>
       </Modal>
-
     </View>
   );
 };
