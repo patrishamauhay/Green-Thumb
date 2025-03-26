@@ -106,6 +106,15 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+        aaptOptions {
+        noCompress "rhn", "ppn" 
+    }
+        sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+
     project.ext.vectoricons = [
     iconFontNames: [ 'MaterialIcons.ttf', 'Ionicons.ttf' ]
         ]

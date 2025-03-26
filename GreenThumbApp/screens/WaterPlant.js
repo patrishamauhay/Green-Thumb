@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator 
+  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Switch
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
@@ -19,6 +19,10 @@ export default function WaterPlant({ navigation }) {
   const [isWatering, setIsWatering] = useState(false);
   const [wateringDuration, setWateringDuration] = useState(2); // Duration set by the user
   const [client, setClient] = useState(null);
+  const [isAutoWateringEnabled, setIsAutoWateringEnabled] = useState(false); // Auto watering toggle
+  const [soilMoisture, setSoilMoisture] = useState(0); // Soil moisture level (for auto watering logic)
+  
+  const MOISTURE_THRESHOLD = 30; // Threshold for soil moisture to trigger automatic watering (adjust as needed)
 
   // Connect to MQTT broker when the component mounts
   useEffect(() => {
@@ -42,7 +46,14 @@ export default function WaterPlant({ navigation }) {
   // Load last watering time from AsyncStorage
   useEffect(() => {
     loadLastWatered();
-  }, []);
+    if (isAutoWateringEnabled) {
+      const interval = setInterval(() => {
+        checkSoilMoisture(); // Check soil moisture periodically
+      }, 60000); // Check every 60 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [isAutoWateringEnabled]);
 
   const loadLastWatered = async () => {
     try {
@@ -52,6 +63,19 @@ export default function WaterPlant({ navigation }) {
       }
     } catch (error) {
       console.error('Failed to load watering data', error);
+    }
+  };
+
+  const checkSoilMoisture = () => {
+    // Simulate soil moisture reading (replace with actual sensor data in production)
+    const moistureLevel = Math.floor(Math.random() * 100); // Simulated value for testing
+    setSoilMoisture(moistureLevel);
+
+    console.log(`Soil Moisture: ${moistureLevel}%`);
+
+    if (moistureLevel < MOISTURE_THRESHOLD) {
+      // Automatically water the plant if moisture is below threshold
+      handleWaterPlant();
     }
   };
 
@@ -94,31 +118,19 @@ export default function WaterPlant({ navigation }) {
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()}></TouchableOpacity>
         <Text style={styles.title}>Water Plant</Text>
         <TouchableOpacity>
           <Ionicons name="settings-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
-
+  
       {/* Plant Icon */}
       <View style={styles.plantContainer}>
         <Ionicons name="leaf-outline" size={80} color="white" />
       </View>
 
-      {/* Status Indicators */}
-      <View style={styles.statusContainer}>
-        <View style={styles.statusBox}>
-          <Text style={styles.statusLabel}>Soil Moisture</Text>
-          <Text style={styles.statusValue}>DRY</Text>
-        </View>
-        <View style={styles.statusBox}>
-          <Text style={styles.statusLabel}>Light Level</Text>
-          <Text style={styles.statusValue}>GOOD</Text>
-        </View>
-      </View>
-
+  
       {/* Watering Duration Slider */}
       <View style={styles.sliderContainer}>
         <Text style={styles.sliderText}>Watering Duration: {wateringDuration} sec</Text>
@@ -133,7 +145,7 @@ export default function WaterPlant({ navigation }) {
           maximumTrackTintColor="#B3E5FC"
           thumbTintColor="#fff"
         />
-
+  
         {/* Numbers Below the Slider */}
         <View style={styles.sliderLabels}>
           <Text style={styles.sliderLabel}>2s</Text>
@@ -141,7 +153,16 @@ export default function WaterPlant({ navigation }) {
           <Text style={styles.sliderLabel}>10s</Text>
         </View>
       </View>
-
+  
+      {/* Enable Auto Watering Toggle */}
+      <View style={styles.autoWateringContainer}>
+        <Text style={styles.autoWateringText}>Enable Automatic Watering</Text>
+        <Switch
+          value={isAutoWateringEnabled}
+          onValueChange={setIsAutoWateringEnabled}
+        />
+      </View>
+  
       {/* Start Watering Button */}
       <TouchableOpacity 
         style={[styles.waterButton, isWatering && styles.disabledButton]} 
@@ -150,7 +171,7 @@ export default function WaterPlant({ navigation }) {
       >
         {isWatering ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>START WATERING</Text>}
       </TouchableOpacity>
-
+  
       {/* View History Button */}
       <TouchableOpacity 
         style={styles.historyButton} 
@@ -158,10 +179,11 @@ export default function WaterPlant({ navigation }) {
       >
         <Text style={styles.buttonText}>VIEW HISTORY</Text>
       </TouchableOpacity>
-
+  
       <ScheduleWater onScheduleSet={(date) => console.log(`Scheduled at: ${date}`)} />
     </LinearGradient>
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -218,18 +240,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  infoContainer: {
-    padding: 15,
-    backgroundColor: '#E3F2E1',
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-  },
-
   sliderContainer: {
     width: '80%',
     alignItems: 'center',
@@ -257,6 +267,18 @@ const styles = StyleSheet.create({
   sliderLabel: {
     fontSize: 14,
     color: '#fff',
+  },
+
+  autoWateringContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+
+  autoWateringText: {
+    fontSize: 16,
+    color: '#fff',
+    marginRight: 10,
   },
 
   waterButton: {
@@ -291,3 +313,4 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
+

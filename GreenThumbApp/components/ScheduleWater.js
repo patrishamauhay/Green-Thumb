@@ -110,11 +110,7 @@ export default function ScheduleWater({ onScheduleSet }) {
   return (
     <>
       {/* Display Next Scheduled Time */}
-      <Text style={styles.statusText}>
-        {isScheduled
-          ? `Next watering: ${formatDateTime(scheduledTime)}`
-          : 'No schedule set'}
-      </Text>
+
 
       {/* Schedule Button */}
       <TouchableOpacity 
@@ -125,6 +121,12 @@ export default function ScheduleWater({ onScheduleSet }) {
           {isScheduled ? "RESCHEDULE WATERING" : "SCHEDULE WATERING"}
         </Text>
       </TouchableOpacity>
+
+      <Text style={styles.statusText}>
+        {isScheduled
+          ? `Next watering: ${formatDateTime(scheduledTime)}`
+          : 'No schedule set'}
+      </Text>
 
       {/* Date and Time Picker */}
       {renderPickers()}

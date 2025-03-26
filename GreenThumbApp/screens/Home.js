@@ -15,7 +15,6 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WaterLevelChart from '../components/WaterLevelChart';
-import VoiceControlButton from '../components/VoiceControlButton'; // Import the VoiceControlButton
 
 const { width, height } = Dimensions.get("window");
 
@@ -108,9 +107,6 @@ export default function Home({ navigation }) {
         )}
       </View>
 
-      <View style={styles.quickAccessContainer}>
-        <VoiceControlButton />
-      </View>
       
       {/* Water Tank Level Section */}
       <View style={styles.waterContainer}>
