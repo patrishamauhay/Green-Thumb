@@ -87,7 +87,14 @@ export default function UserPlantDetails({ route, navigation }) {
         end={{ x: 1, y: 1 }}
         style={styles.infoSection}
       >
-        <Text style={styles.plantName}>{plant.userPlantName || 'Unnamed Plant'}</Text>
+<View>
+        <Text style={styles.plantName}>
+          {plant.userPlantName || 'Unnamed Plant'}
+        </Text>
+        <Text style={styles.speciesName}>
+          {plant.commonName || 'Unknown Species'}
+        </Text>
+      </View>
         <TouchableOpacity>
           <Ionicons name="settings-outline" size={24} color="white" />
         </TouchableOpacity>
@@ -115,7 +122,7 @@ export default function UserPlantDetails({ route, navigation }) {
       <DashboardSection plantId={plantId} docId={docId} />
     </View>
     <View style={styles.section}>
-      <CareSection speciesId={plant.id} />
+    <CareSection speciesId={plant.plantId} />
     </View>
     <View style={styles.section}>
       <PlantInfoSection plant={plant} />
@@ -180,4 +187,12 @@ const styles = StyleSheet.create({
     height: height - 350,
   },
   sectionText: { fontSize: 18, color: 'darkgrey' },
+  speciesName: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: 'white',
+    opacity: 0.85,
+    marginTop: 2,
+  },
+  
 });
