@@ -111,11 +111,20 @@ export default function UserPlantDetails({ route, navigation }) {
       </LinearGradient>
 
       <Animated.View style={[styles.sectionContainer, { transform: [{ translateX }] }]}>
-        <DashboardSection plantId={plantId} docId={docId} />
-        <CareSection speciesId={plant.id} />
-        <PlantInfoSection />
-        <NotesSection plantId={plantId} />
-        </Animated.View>
+    <View style={styles.section}>
+      <DashboardSection plantId={plantId} docId={docId} />
+    </View>
+    <View style={styles.section}>
+      <CareSection speciesId={plant.id} />
+    </View>
+    <View style={styles.section}>
+      <PlantInfoSection plant={plant} />
+    </View>
+    <View style={styles.section}>
+      <NotesSection plantId={plantId} />
+    </View>
+  </Animated.View>
+
     </View>
   );
 }
@@ -164,12 +173,11 @@ const styles = StyleSheet.create({
   sectionContainer: {
     flexDirection: 'row',
     width: width * 4,
+    height: '100%',
   },
   section: {
     width: width,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    height: height - 350,
   },
   sectionText: { fontSize: 18, color: 'darkgrey' },
 });

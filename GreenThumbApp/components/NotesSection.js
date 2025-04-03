@@ -71,14 +71,13 @@ const NotesSection = ({ plantId }) => {
   
       let path = uri;
   
-      // ✅ Handle content:// URIs correctly
+      // Handle content:// URIs correctly
       if (uri.startsWith('content://')) {
         const newPath = `${RNFS.TemporaryDirectoryPath}/${Date.now()}.jpg`;
         await RNFS.copyFile(uri, newPath);
         path = `file://${newPath}`;
       }
   
-      // ✅ Double-check that path is a string before proceeding
       if (!path || typeof path !== 'string') {
         console.error('Path is null or not a string:', path);
         Alert.alert('Error', 'Invalid file path');
@@ -113,16 +112,14 @@ const NotesSection = ({ plantId }) => {
     }
   };
   
-
-  // ✅ Handle adding notes and images to Firestore
   const handleSave = async () => {
     if (!plantId) {
       Alert.alert('Error', 'Invalid plant ID');
       return;
     }
   
-    if (!notes.trim() && images.length === 0) {
-      Alert.alert('Error', 'Please add notes or an image');
+    if (!notes.trim()) {
+      Alert.alert('Error', 'Please write a note before saving');
       return;
     }
   
@@ -133,26 +130,12 @@ const NotesSection = ({ plantId }) => {
         return;
       }
   
-      console.log('User ID:', userId);
-      console.log('Plant ID:', plantId);
-      console.log('Notes:', notes);
-  
-      // ✅ Remove images field if empty
       const newEntry = {
-        notes: typeof notes === 'string' ? notes.trim() : '',
+        notes: notes.trim(),
         createdAt: firestore.Timestamp.now(),
       };
   
-      if (images.length > 0) {
-        newEntry.images = images;
-      }
-  
-      console.log('Saving data:', newEntry);
-  
-      const docPath = `users/${userId}/myGarden/${plantId}/snapHistory`;
-      console.log('Firestore path:', docPath);
-  
-      const docRef = await firestore()
+      await firestore()
         .collection('users')
         .doc(userId)
         .collection('myGarden')
@@ -160,18 +143,17 @@ const NotesSection = ({ plantId }) => {
         .collection('snapHistory')
         .add(newEntry);
   
-      console.log('Successfully saved note with ID:', docRef.id);
-  
+      console.log('Note saved successfully');
       setNotes('');
-      setImages([]);
-      loadHistory(); // Refresh history after saving
+      setImages([]); // optional, no need if image is disabled
+      loadHistory();
       setModalVisible(false);
-  
     } catch (error) {
-      console.error('Error saving snap history:', error);
+      console.error('Error saving note:', error);
       Alert.alert('Error', `Failed to save note: ${error.message}`);
     }
   };
+  
   
   // ✅ Open camera or gallery to add an image
   const handleAddImage = async () => {
@@ -210,17 +192,16 @@ const NotesSection = ({ plantId }) => {
         return;
       }
 
-      if (response.assets && response.assets[0]?.uri) {
-        const uri = response.assets[0].uri;
+      // if (response.assets && response.assets[0]?.uri) {
+      //   const uri = response.assets[0].uri;
 
-        // ✅ Upload image and get download URL
-        const downloadUrl = await uploadImage(uri);
-        if (downloadUrl) {
-          setImages((prevImages) => [...prevImages, downloadUrl]); // Save download URL to state
-        }
-      } else {
-        console.error('Invalid image response:', response);
-      }
+      //   // const downloadUrl = await uploadImage(uri);
+      //   // if (downloadUrl) {
+      //   //   setImages((prevImages) => [...prevImages, downloadUrl]); // Save download URL to state
+      //   // }
+      // } else {
+      //   console.error('Invalid image response:', response);
+      // }
     }
   );
 };
