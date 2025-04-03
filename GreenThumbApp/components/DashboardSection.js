@@ -51,6 +51,7 @@ const DashboardSection = ({ plantId, docId }) => {
 
   const toggleActivation = async () => {
     if (!userId || !docId) {
+      console.log("Toggling activation...");
       setErrorMessage("Missing userId or plantId.");
       return;
     }
@@ -84,6 +85,7 @@ const DashboardSection = ({ plantId, docId }) => {
 
       setErrorMessage(null);
     } catch (error) {
+      console.error("Toggle activation Firestore error:", error);
       setErrorMessage("Failed to update activation.");
       Alert.alert("Error", "Could not update activation. Please try again.");
     }

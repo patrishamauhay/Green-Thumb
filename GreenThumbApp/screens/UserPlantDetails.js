@@ -160,8 +160,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
   },
-  plantName: { fontSize: 25, color: 'white', fontWeight: 'bold' },
-  tabContainer: {
+  plantName: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+    tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
@@ -189,10 +194,9 @@ const styles = StyleSheet.create({
   sectionText: { fontSize: 18, color: 'darkgrey' },
   speciesName: {
     fontSize: 14,
+    color: '#f0f0f0',
     fontStyle: 'italic',
-    color: 'white',
     opacity: 0.85,
-    marginTop: 2,
   },
   
 });
