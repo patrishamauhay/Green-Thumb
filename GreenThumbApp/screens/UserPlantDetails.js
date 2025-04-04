@@ -192,11 +192,11 @@ const styles = StyleSheet.create({
     height: height - 350,
   },
   sectionText: { fontSize: 18, color: 'darkgrey' },
-  speciesName: {
-    fontSize: 14,
-    color: '#f0f0f0',
-    fontStyle: 'italic',
-    opacity: 0.85,
-  },
+speciesName: {
+  fontSize: 14,
+  color: '#f0f0f0',
+  fontStyle: 'italic',
+  opacity: 0.85,
+},
   
 });

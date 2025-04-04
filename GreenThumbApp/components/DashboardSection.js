@@ -12,6 +12,7 @@ import auth from "@react-native-firebase/auth";
 import Svg, { Path, Text as SvgText, Defs, LinearGradient, Stop } from "react-native-svg";
 import { LineChart } from "react-native-chart-kit";
 
+
 const DashboardSection = ({ plantId, docId }) => {
   const [isActivated, setIsActivated] = useState(false);
   const [sensorData, setSensorData] = useState(null);
@@ -160,54 +161,68 @@ const DashboardSection = ({ plantId, docId }) => {
 
         {/* Toggle Switch Card */}
         <View style={styles.switchCard}>
+
+          <Text style={styles.switchLabel}>Sensor Control</Text>
+
           <Switch
             value={isActivated}
             onValueChange={toggleActivation}
-            trackColor={{ false: "#767577", true: "#4CAF50" }}
-            thumbColor={isActivated ? "#FFF" : "#f4f3f4"}
+            trackColor={{ false: "#ddd", true: "#A5D6A7" }}
+            thumbColor={isActivated ? "#4CAF50" : "#f4f4f4"}
+            ios_backgroundColor="#ccc"
+            style={{ transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }] }}
           />
-          <Text style={styles.toggleText}>
+
+          <Text
+            style={{
+              marginTop: 8,
+              fontSize: 13,
+              fontWeight: "600",
+              color: isActivated ? "#4CAF50" : "#888",
+            }}
+          >
             {isActivated ? "Activated" : "Deactivated"}
           </Text>
         </View>
-      </View>
 
-      {/* Moisture History Chart */}
-      <View style={styles.chartCard}>
-        <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
-        <LineChart
-  data={{
-    labels: moistureHistory.length > 0
-      ? moistureHistory.map((_, index) => `T${index + 1}`)
-      : ['T1', 'T2', 'T3', 'T4', 'T5'],
-    datasets: [
-      {
-        data: moistureHistory.length > 0
-          ? moistureHistory.map(entry => entry.value)
-          : [0, 0, 0, 0, 0],
-        color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`, // ✅ Define color function
-        strokeWidth: 3,
-      },
-    ],
-  }}
-  width={width * 0.85}
-  height={220}
-  yAxisSuffix="%"
-  chartConfig={{
-    backgroundColor: "#ffffff",
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
-    decimalPlaces: 1,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define color function
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define labelColor function
-    propsForDots: {
-      r: "4",
-      strokeWidth: "2",
-      stroke: "#4CAF50",
-    },
-  }}
-  bezier
-/>
+                  </View>
+
+              {/* Moisture History Chart */}
+              <View style={styles.chartCard}>
+                <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
+                <LineChart
+          data={{
+            labels: moistureHistory.length > 0
+              ? moistureHistory.map((_, index) => `T${index + 1}`)
+              : ['T1', 'T2', 'T3', 'T4', 'T5'],
+            datasets: [
+              {
+                data: moistureHistory.length > 0
+                  ? moistureHistory.map(entry => entry.value)
+                  : [0, 0, 0, 0, 0],
+                color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`, // ✅ Define color function
+                strokeWidth: 3,
+              },
+            ],
+          }}
+          width={width * 0.85}
+          height={220}
+          yAxisSuffix="%"
+          chartConfig={{
+            backgroundColor: "#ffffff",
+            backgroundGradientFrom: "#ffffff",
+            backgroundGradientTo: "#ffffff",
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define color function
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define labelColor function
+            propsForDots: {
+              r: "4",
+              strokeWidth: "2",
+              stroke: "#4CAF50",
+            },
+          }}
+          bezier
+        />
 
       </View>
     </View>
@@ -215,7 +230,6 @@ const DashboardSection = ({ plantId, docId }) => {
 };
 
 const { width } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -241,20 +255,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
-  },
-  switchCard: {
-    width: width * 0.3,
-    height: 160,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 5,
-    marginLeft: 10,
-  },
+  }, 
+switchCard: {
+  width: width * 0.3,
+  height: 130, // ⬅️ Reduced
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: 10, // ⬅️ Less vertical padding
+  paddingHorizontal: 10,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.15,
+  shadowRadius: 5,
+  elevation: 5,
+  marginLeft: 10,
+},
   chartCard: {
     marginTop: 20,
     width: width * 0.9,
