@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   section: {
     width: width,
-    height: height - 350,
+    height: height - 350,  
   },
   sectionText: { fontSize: 18, color: 'darkgrey' },
 speciesName: {
