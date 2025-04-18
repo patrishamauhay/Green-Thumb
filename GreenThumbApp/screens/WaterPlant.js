@@ -1,3 +1,7 @@
+// Water Screen
+// To allow users to manuallally, automatically, and schedule irrigation
+// This code publishes mqtt messages to communicate with the ESP32 to open the valve
+
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Switch
@@ -6,13 +10,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import mqtt from 'mqtt/dist/mqtt';  // Import MQTT library (correct path)
-import 'react-native-url-polyfill/auto';  // Import URL polyfill for WebSocket support
+import mqtt from 'mqtt/dist/mqtt'; 
+import 'react-native-url-polyfill/auto'; 
 
 import ScheduleWater from '../components/ScheduleWater';
 
 const MQTT_BROKER = "ws://test.mosquitto.org:8080"; // WebSocket connection for MQTT
-const TOPIC = "relay_control";  // Original topic from your old code
+const TOPIC = "relay_control"; 
 
 export default function WaterPlant({ navigation }) {
   const [lastWatered, setLastWatered] = useState(null);
@@ -20,11 +24,10 @@ export default function WaterPlant({ navigation }) {
   const [wateringDuration, setWateringDuration] = useState(2); // Duration set by the user
   const [client, setClient] = useState(null);
   const [isAutoWateringEnabled, setIsAutoWateringEnabled] = useState(false); // Auto watering toggle
-  const [soilMoisture, setSoilMoisture] = useState(0); // Soil moisture level (for auto watering logic)
+  const [soilMoisture, setSoilMoisture] = useState(0); // Soil moisture level
   
-  const MOISTURE_THRESHOLD = 30; // Threshold for soil moisture to trigger automatic watering (adjust as needed)
+  const MOISTURE_THRESHOLD = 30; // Threshold for soil moisture to trigger automatic watering
 
-  // Connect to MQTT broker when the component mounts
   useEffect(() => {
     const mqttClient = mqtt.connect(MQTT_BROKER);
 

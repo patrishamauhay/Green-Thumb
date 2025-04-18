@@ -113,9 +113,6 @@ export default function Home({ navigation }) {
         <Text style={styles.sectionTitle}>Water Tank Level</Text>
         <WaterLevelChart value={75} />
       </View>
-
-
-    
     </ScrollView>
   );
 }

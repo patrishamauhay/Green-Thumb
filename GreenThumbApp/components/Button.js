@@ -23,8 +23,8 @@ class Button extends Component {
     const buttonStyles = [
       styles.button,
       shadow && styles.shadow,
-      color && styles[color], // predefined styles colors for backgroundColor
-      color && !styles[color] && { backgroundColor: color }, // custom backgroundColor
+      color && styles[color], 
+      color && !styles[color] && { backgroundColor: color }, 
       style
     ];
 

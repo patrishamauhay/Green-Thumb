@@ -1,3 +1,8 @@
+/**
+ * ScheduleWater Component
+ * 
+ * This component dallows the user to schedule their watering times
+ */
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

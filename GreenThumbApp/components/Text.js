@@ -16,7 +16,6 @@ export default class Typography extends Component {
       size,
       transform,
       align,
-      // styling
       regular,
       bold,
       semibold,
@@ -25,9 +24,8 @@ export default class Typography extends Component {
       light,
       center,
       right,
-      spacing, // letter-spacing
-      height, // line-height
-      // colors
+      spacing,
+      height,
       color,
       accent,
       primary,

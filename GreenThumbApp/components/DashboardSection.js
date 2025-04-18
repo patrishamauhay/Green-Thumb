@@ -1,3 +1,12 @@
+/**
+ * DashboardSection Component
+ * 
+ * This component displays a real-time overview of a plant's sensor data.
+ * It shows current soil moisture with a visual gauge, a history line chart,
+ * and allows the user to toggle activation of live sensor streaming and control.
+ * It uses Firebase Firestore for data syncing and MQTT logic tied to the "Activated" state.
+ */
+
 import React, { useEffect, useState } from "react";
 import {
   View,

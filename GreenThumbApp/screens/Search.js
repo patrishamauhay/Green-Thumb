@@ -18,19 +18,19 @@ export default function Search({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [isFocused, setIsFocused] = useState(false); // Controls the highlight
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     fetchAllPlants();
     loadRecentSearches(); // Load recent searches on start
   }, []);
 
-  // Fetch all plants when the screen loads
+  // Fetch all plants
   const fetchAllPlants = async () => {
     setIsLoading(true);
     try {
       const results = await fetchPlants('');
-      const filteredPlants = results.filter((plant) => plant.default_image); // Only keep plants with images
+      const filteredPlants = results.filter((plant) => plant.default_image);
       const sortedPlants = filteredPlants.sort((a, b) => a.common_name.localeCompare(b.common_name));
       setPlants(sortedPlants);
     } catch (error) {
@@ -40,7 +40,7 @@ export default function Search({ navigation }) {
     }
   };
 
-  // Save search queries to AsyncStorage
+  // Save search queries
   const saveSearch = async (query) => {
     if (!query) return;
     let searches = JSON.parse(await AsyncStorage.getItem('recentSearches')) || [];
@@ -52,7 +52,7 @@ export default function Search({ navigation }) {
     loadRecentSearches();
   };
 
-  // Load recent searches from AsyncStorage
+  // Load recent searches
   const loadRecentSearches = async () => {
     const searches = JSON.parse(await AsyncStorage.getItem('recentSearches')) || [];
     setRecentSearches(searches);
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
 
   searchBarFocused: {
-    borderColor: '#4CAF50', // Green highlight
+    borderColor: '#4CAF50', 
     borderWidth: 2,
   },
 

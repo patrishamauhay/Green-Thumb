@@ -1,3 +1,9 @@
+/**
+ * PlantInfoSection Component
+ * 
+ * This component shows the information about the plant species
+ */
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { fetchPlantDetails } from '../api/plants';

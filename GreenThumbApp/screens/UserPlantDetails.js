@@ -23,7 +23,7 @@ import CareSection from '../components/CareSection';
 import { colors } from '../constants/theme'; 
 
 const { height, width } = Dimensions.get('screen');
-const sections = ['Dashboard', 'Care','Plant Info', 'Notes'];
+const sections = ['Dashboard', 'Care','Plant Info'];
 
 export default function UserPlantDetails({ route, navigation }) {
   const { plantId, docId } = route.params;
@@ -127,9 +127,7 @@ export default function UserPlantDetails({ route, navigation }) {
     <View style={styles.section}>
       <PlantInfoSection plant={plant} />
     </View>
-    <View style={styles.section}>
-      <NotesSection plantId={plantId} />
-    </View>
+
   </Animated.View>
 
     </View>

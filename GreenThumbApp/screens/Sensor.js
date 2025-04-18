@@ -33,7 +33,7 @@ export default function SensorScreen({ navigation }) {
           }));
           setPlants(plantList);
 
-          // ✅ Check which plant the sensor is assigned to
+          // Check which plant the sensor is assigned to
           const assignedPlant = plantList.find((plant) => plant.sensorAssigned);
           setAssignedPlantId(assignedPlant ? assignedPlant.id : null);
         });
@@ -42,7 +42,7 @@ export default function SensorScreen({ navigation }) {
     }
   }, [userId]);
 
-  // ✅ Assign Sensor to Selected Plant
+  // Assign Sensor to Selected Plant
   const handleAssignSensor = async () => {
     if (!selectedPlant) {
       Alert.alert('Error', 'Please select a plant.');
@@ -50,7 +50,7 @@ export default function SensorScreen({ navigation }) {
     }
 
     try {
-      // ✅ Remove sensor assignment from previously assigned plant (if any)
+      // Remove sensor assignment from previously assigned plant
       if (assignedPlantId) {
         await firestore()
           .collection('users')
@@ -60,7 +60,7 @@ export default function SensorScreen({ navigation }) {
           .update({ sensorAssigned: false });
       }
 
-      // ✅ Assign sensor to the new plant
+      // Assign sensor to the new plant
       await firestore()
         .collection('users')
         .doc(userId)
@@ -77,7 +77,7 @@ export default function SensorScreen({ navigation }) {
     }
   };
 
-  // ✅ Unassign the sensor from the current plant
+  // Unassign the sensor from the current plant
   const handleUnassignSensor = async () => {
     if (!assignedPlantId) {
       Alert.alert('Error', 'No plant currently assigned to the sensor.');
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   assignedPlant: {
-    backgroundColor: '#FFCC00', // Yellow background for assigned sensor
+    backgroundColor: '#FFCC00',
   },
   plantText: {
     fontSize: 16,

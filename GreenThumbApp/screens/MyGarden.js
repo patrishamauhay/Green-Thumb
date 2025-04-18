@@ -54,7 +54,6 @@ export default function MyGarden({ navigation }) {
         <View style={styles.nameRow}>
           <Text style={styles.name}>{item.userPlantName || 'Unnamed Plant'}</Text>
 
-          {/* Green Dot for Active Plant */}
           {item.Activated && <View style={styles.greenDot} />}
         </View>
         <Text style={styles.scientific}>{item.commonName}</Text>
@@ -64,7 +63,6 @@ export default function MyGarden({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <LinearGradient
         colors={[colors.primary, colors.secondary]}
         start={{ x: 0, y: 0 }}
@@ -103,7 +101,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
 
-  /* Header */
   header: { 
     flexDirection: 'row',
     alignItems: 'center',
@@ -126,7 +123,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  /* Empty State */
   noPlantsContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -148,13 +144,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },  
 
-  /* List Layout */
   listContainer: {
     paddingHorizontal: 10,
     paddingTop: 10,
   },
 
-  /* Plant Item Card */
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -171,7 +165,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
 
-  /* Plant Image */
   image: { 
     width: 100, 
     height: 100, 
@@ -179,7 +172,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  /* Text Container */
   textContainer: {
     flex: 1,
   },
@@ -195,13 +187,12 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-  /* Green Dot for Active Plant */
   greenDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
     backgroundColor: '#4CAF50',
-    marginLeft: 8, // Add spacing from plant name
+    marginLeft: 8,
   },
 
   scientific: { 

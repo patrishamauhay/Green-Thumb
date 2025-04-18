@@ -1,3 +1,9 @@
+/**
+ * CareSection Component
+ * 
+ * It shows the care instructions of the user's current plant
+ * 
+ */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { fetchCareGuide } from '../api/plants';
@@ -48,7 +54,6 @@ const CareSection = ({ speciesId }) => {
   );
 };
 
-// Capitalize helper
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const styles = StyleSheet.create({
