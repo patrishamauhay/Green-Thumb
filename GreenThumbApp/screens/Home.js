@@ -24,6 +24,7 @@ export default function Home({ navigation }) {
   const [loading, setLoading] = useState(true);
   const userId = auth().currentUser?.uid;
 
+  // Fetch garden data from Firestore
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(setUser);
     return () => unsubscribe();
@@ -50,6 +51,7 @@ export default function Home({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      
       {/* Header Section */}
       <View style={styles.headerContainer}>
         <Image 

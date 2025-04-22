@@ -20,11 +20,11 @@ def get_active_user():
         users_docs = users_ref.get()
 
         for user_doc in users_docs:
-            print(f"✅ Found active user: {user_doc.id}")
+            print(f"Found active user: {user_doc.id}")
             return user_doc.id  # ✅ Return the first active user found
 
     except Exception as e:
-        print(f"🔥 Error fetching active user: {e}")
+        print(f"Error fetching active user: {e}")
     
     return None  # No active user found
 
@@ -42,7 +42,7 @@ def get_active_plant(user_id):
             return str(plant_id) if plant_id else None
 
     except Exception as e:
-        print(f"🔥 Error fetching active plant for user {user_id}: {e}")
+        print(f"Error fetching active plant for user {user_id}: {e}")
     
     return None  # No active plant found
 
@@ -50,17 +50,17 @@ def get_active_plant(user_id):
 def store_sensor_data(user_id, plant_id, light, soil_moisture):
     """Store sensor data in Firestore for the active plant."""
     if not user_id:
-        print("⚠️ No active user found.")
+        print("No active user found.")
         return
     if not plant_id:
-        print("⚠️ No plant is assigned to receive sensor data.")
+        print("No plant is assigned to receive sensor data.")
         return
 
     try:
         # Reference to the plant document
         sensor_ref = db.collection("users").document(user_id).collection("myGarden").document(plant_id)
 
-        # ✅ Update latest sensor reading directly (overwrite old)
+        # Update latest sensor reading directly
         sensor_ref.set({
             "latestSensorData": {
                 "Light": light,
@@ -72,15 +72,15 @@ def store_sensor_data(user_id, plant_id, light, soil_moisture):
         print(f"✅ Updated latest sensor data for plant {plant_id}: Light {light}%, Soil Moisture {soil_moisture}%")
 
     except Exception as e:
-        print(f"🔥 Error storing sensor data: {e}")
+        print(f"Error storing sensor data: {e}")
 
 def on_connect(client, userdata, flags, rc):
     """Handle connection to MQTT broker and subscribe to topic."""
     if rc == 0:
         print("✅ Connected to MQTT Broker successfully")
-        client.subscribe(MQTT_TOPIC)  # ✅ Now subscribing to receive data
+        client.subscribe(MQTT_TOPIC)  # Now subscribing to receive data
     else:
-        print(f"🔥 Connection failed with code {rc}")
+        print(f"Connection failed with code {rc}")
 
 def on_message(client, userdata, msg):
     """Handle received MQTT messages."""
@@ -89,17 +89,17 @@ def on_message(client, userdata, msg):
         light = float(payload.get("Light", 0))
         soil_moisture = float(payload.get("Soil Moisture", 0))
 
-        user_id = get_active_user()  # ✅ Get the active user
+        user_id = get_active_user()  # Get the active user
         if not user_id:
             print("⚠️ No user has activated a sensor.")
             return
 
-        plant_id = get_active_plant(user_id)  # ✅ Get the active plant
+        plant_id = get_active_plant(user_id)  # Get the active plant
         if not plant_id:
             print("⚠️ No active plant assigned to user.")
             return
 
-        store_sensor_data(user_id, plant_id, light, soil_moisture)  # ✅ Save sensor data to Firestore
+        store_sensor_data(user_id, plant_id, light, soil_moisture)  # Save sensor data to Firestore
 
     except json.JSONDecodeError:
         print("🔥 Received invalid JSON data from MQTT topic")
@@ -119,7 +119,7 @@ def connect_mqtt():
             client.connect(MQTT_BROKER, 1883, 60)
             client.loop_forever()
         except Exception as e:
-            print(f"🔥 MQTT Connection Error: {e}, retrying in 5 seconds...")
+            print(f"MQTT Connection Error: {e}, retrying in 5 seconds...")
             time.sleep(5)
 
 # Start MQTT Connection with Auto-Reconnect
