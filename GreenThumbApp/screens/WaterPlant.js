@@ -1,10 +1,8 @@
 // Water Screen
-// To allow users to manually, automatically, and schedule irrigation
-// Updated to record watering history properly.
 
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Switch
+  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Switch, Platform, PermissionsAndroid
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
@@ -12,7 +10,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import mqtt from 'mqtt/dist/mqtt'; 
 import 'react-native-url-polyfill/auto'; 
-
+import PushNotification from 'react-native-push-notification';
 import ScheduleWater from '../components/ScheduleWater';
 
 const MQTT_BROKER = "ws://test.mosquitto.org:8080"; // WebSocket connection for MQTT
@@ -29,6 +27,7 @@ export default function WaterPlant({ navigation }) {
   const MOISTURE_THRESHOLD = 30;
 
   useEffect(() => {
+    // Connect to MQTT broker
     const mqttClient = mqtt.connect(MQTT_BROKER);
 
     mqttClient.on("connect", () => {
@@ -47,11 +46,46 @@ export default function WaterPlant({ navigation }) {
   }, []);
 
   useEffect(() => {
+    // Load last watering time
     loadLastWatered();
+
+    // Configure Push Notifications
+    PushNotification.configure({
+      onNotification: function (notification) {
+        console.log("Local Notification Received:", notification);
+      },
+      requestPermissions: Platform.OS === 'ios',
+    });
+
+    // Create Notification Channel (IMPORTANT)
+    PushNotification.createChannel(
+      {
+        channelId: "plant-care-channel", // (required)
+        channelName: "Plant Care Alerts", // (required)
+        channelDescription: "A channel for plant watering and moisture alerts",
+        importance: 4, // Max
+        vibrate: true,
+      },
+      (created) => console.log(`createChannel returned '${created}'`)
+    );
+
+    // Request Notification Permission on Android 13+
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS)
+        .then((result) => {
+          if (result === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log("Notification permission granted.");
+          } else {
+            console.log("Notification permission denied.");
+          }
+        });
+    }
+
+    // Auto-watering interval if enabled
     if (isAutoWateringEnabled) {
       const interval = setInterval(() => {
         checkSoilMoisture();
-      }, 60000);
+      }, 60000); // every minute
       return () => clearInterval(interval);
     }
   }, [isAutoWateringEnabled]);
@@ -67,7 +101,6 @@ export default function WaterPlant({ navigation }) {
     }
   };
 
-  // New: Save watering history to AsyncStorage
   const pushWateringEntry = async (entry) => {
     try {
       const raw = await AsyncStorage.getItem('wateringHistory');
@@ -80,12 +113,21 @@ export default function WaterPlant({ navigation }) {
   };
 
   const checkSoilMoisture = () => {
-    const moistureLevel = Math.floor(Math.random() * 100);
+    const moistureLevel = 20; // Force low for now (change to Math.random later)
     setSoilMoisture(moistureLevel);
     console.log(`Soil Moisture: ${moistureLevel}%`);
 
     if (moistureLevel < MOISTURE_THRESHOLD) {
       handleWaterPlant();
+
+      PushNotification.localNotification({
+        channelId: "plant-care-channel", // must match created channel
+        title: "Low Moisture Alert 🌱",
+        message: `Soil moisture is low (${moistureLevel}%). Please water your plant!`,
+        playSound: true,
+        soundName: 'default',
+        vibrate: true,
+      });
     }
   };
 
@@ -112,7 +154,7 @@ export default function WaterPlant({ navigation }) {
       try {
         await AsyncStorage.setItem('lastWatered', now);
         const entry = `${now}, ${wateringDuration}s`;
-        await pushWateringEntry(entry); // New: Save to watering history
+        await pushWateringEntry(entry);
         Alert.alert('Success', `Your plant has been watered for ${wateringDuration} seconds!`);
       } catch (error) {
         console.error('Failed to save watering data', error);
@@ -179,96 +221,42 @@ export default function WaterPlant({ navigation }) {
         <Text style={styles.buttonText}>VIEW HISTORY</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity 
+        style={styles.testButton}
+        onPress={() => {
+          PushNotification.localNotification({
+            channelId: "plant-care-channel", // must match created channel
+            title: "🔔 Test Notification",
+            message: "This is a test! Notifications are working 🎯",
+            playSound: true,
+            soundName: 'default',
+            vibrate: true,
+          });
+        }}
+      >
+        <Text style={styles.buttonText}>TEST NOTIFICATION</Text>
+      </TouchableOpacity>
+
       <ScheduleWater onScheduleSet={(date) => console.log(`Scheduled at: ${date}`)} />
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 50,
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    width: '90%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  plantContainer: {
-    marginTop: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    padding: 20,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  sliderContainer: {
-    width: '80%',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  sliderText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  slider: {
-    width: '100%',
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 5,
-  },
-  sliderLabel: {
-    fontSize: 14,
-    color: '#fff',
-  },
-  autoWateringContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  autoWateringText: {
-    fontSize: 16,
-    color: '#fff',
-    marginRight: 10,
-  },
-  waterButton: {
-    width: '80%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    paddingVertical: 15,
-    borderRadius: 30,
-    alignItems: 'center',
-    marginTop: 30,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  historyButton: {
-    width: '80%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingVertical: 15,
-    borderRadius: 30,
-    alignItems: 'center',
-    marginTop: 15,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
+  container: { flex: 1, paddingTop: 50, alignItems: 'center' },
+  header: { flexDirection: 'row', width: '90%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
+  plantContainer: { marginTop: 20, backgroundColor: 'rgba(255, 255, 255, 0.2)', padding: 20, borderRadius: 20, alignItems: 'center' },
+  sliderContainer: { width: '80%', alignItems: 'center', marginTop: 10 },
+  sliderText: { fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 5 },
+  slider: { width: '100%' },
+  sliderLabels: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 5 },
+  sliderLabel: { fontSize: 14, color: '#fff' },
+  autoWateringContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
+  autoWateringText: { fontSize: 16, color: '#fff', marginRight: 10 },
+  waterButton: { width: '80%', backgroundColor: 'rgba(255, 255, 255, 0.3)', paddingVertical: 15, borderRadius: 30, alignItems: 'center', marginTop: 30, borderWidth: 2, borderColor: '#fff' },
+  historyButton: { width: '80%', backgroundColor: 'rgba(255, 255, 255, 0.1)', paddingVertical: 15, borderRadius: 30, alignItems: 'center', marginTop: 15, borderWidth: 2, borderColor: '#fff' },
+  buttonText: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
+  disabledButton: { opacity: 0.5 },
+  testButton: { width: '80%', backgroundColor: 'rgba(255, 255, 255, 0.3)', paddingVertical: 15, borderRadius: 30, alignItems: 'center', marginTop: 15, borderWidth: 2, borderColor: '#fff' },
 });
