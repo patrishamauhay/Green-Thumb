@@ -1,6 +1,6 @@
 // Water Screen
-// To allow users to manuallally, automatically, and schedule irrigation
-// This code publishes mqtt messages to communicate with the ESP32 to open the valve
+// To allow users to manually, automatically, and schedule irrigation
+// Updated to record watering history properly.
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -21,12 +21,12 @@ const TOPIC = "relay_control";
 export default function WaterPlant({ navigation }) {
   const [lastWatered, setLastWatered] = useState(null);
   const [isWatering, setIsWatering] = useState(false);
-  const [wateringDuration, setWateringDuration] = useState(2); // Duration set by the user
+  const [wateringDuration, setWateringDuration] = useState(2);
   const [client, setClient] = useState(null);
-  const [isAutoWateringEnabled, setIsAutoWateringEnabled] = useState(false); // Auto watering toggle
-  const [soilMoisture, setSoilMoisture] = useState(0); // Soil moisture level
-  
-  const MOISTURE_THRESHOLD = 30; // Threshold for soil moisture to trigger automatic watering
+  const [isAutoWateringEnabled, setIsAutoWateringEnabled] = useState(false);
+  const [soilMoisture, setSoilMoisture] = useState(0);
+
+  const MOISTURE_THRESHOLD = 30;
 
   useEffect(() => {
     const mqttClient = mqtt.connect(MQTT_BROKER);
@@ -42,18 +42,16 @@ export default function WaterPlant({ navigation }) {
     setClient(mqttClient);
 
     return () => {
-      mqttClient.end(); // Disconnect when component unmounts
+      mqttClient.end();
     };
   }, []);
 
-  // Load last watering time from AsyncStorage
   useEffect(() => {
     loadLastWatered();
     if (isAutoWateringEnabled) {
       const interval = setInterval(() => {
-        checkSoilMoisture(); // Check soil moisture periodically
-      }, 60000); // Check every 60 seconds
-
+        checkSoilMoisture();
+      }, 60000);
       return () => clearInterval(interval);
     }
   }, [isAutoWateringEnabled]);
@@ -69,20 +67,28 @@ export default function WaterPlant({ navigation }) {
     }
   };
 
-  const checkSoilMoisture = () => {
-    // Simulate soil moisture reading (replace with actual sensor data in production)
-    const moistureLevel = Math.floor(Math.random() * 100); // Simulated value for testing
-    setSoilMoisture(moistureLevel);
+  // New: Save watering history to AsyncStorage
+  const pushWateringEntry = async (entry) => {
+    try {
+      const raw = await AsyncStorage.getItem('wateringHistory');
+      const history = raw ? JSON.parse(raw) : [];
+      const newHistory = [entry, ...history];
+      await AsyncStorage.setItem('wateringHistory', JSON.stringify(newHistory));
+    } catch (error) {
+      console.error('Failed to save watering history', error);
+    }
+  };
 
+  const checkSoilMoisture = () => {
+    const moistureLevel = Math.floor(Math.random() * 100);
+    setSoilMoisture(moistureLevel);
     console.log(`Soil Moisture: ${moistureLevel}%`);
 
     if (moistureLevel < MOISTURE_THRESHOLD) {
-      // Automatically water the plant if moisture is below threshold
       handleWaterPlant();
     }
   };
 
-  // Function to publish MQTT message
   const sendMQTTMessage = (message) => {
     if (client) {
       client.publish(TOPIC, message);
@@ -95,11 +101,9 @@ export default function WaterPlant({ navigation }) {
   const handleWaterPlant = async () => {
     setIsWatering(true);
 
-    // Send "ON" message to turn on the relay
     sendMQTTMessage("ON");
 
     setTimeout(async () => {
-      // Send "OFF" message to turn off the relay after the set watering duration
       sendMQTTMessage("OFF");
 
       const now = new Date().toLocaleString();
@@ -107,19 +111,19 @@ export default function WaterPlant({ navigation }) {
 
       try {
         await AsyncStorage.setItem('lastWatered', now);
+        const entry = `${now}, ${wateringDuration}s`;
+        await pushWateringEntry(entry); // New: Save to watering history
         Alert.alert('Success', `Your plant has been watered for ${wateringDuration} seconds!`);
       } catch (error) {
         console.error('Failed to save watering data', error);
       }
 
       setIsWatering(false);
-    }, wateringDuration * 1000); // Delay based on the user-selected watering duration
+    }, wateringDuration * 1000);
   };
 
   return (
     <LinearGradient colors={['#26f2bc', '#5B86E5']} style={styles.container}>
-      
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}></TouchableOpacity>
         <Text style={styles.title}>Water Plant</Text>
@@ -127,14 +131,11 @@ export default function WaterPlant({ navigation }) {
           <Ionicons name="settings-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
-  
-      {/* Plant Icon */}
+
       <View style={styles.plantContainer}>
         <Ionicons name="leaf-outline" size={80} color="white" />
       </View>
 
-  
-      {/* Watering Duration Slider */}
       <View style={styles.sliderContainer}>
         <Text style={styles.sliderText}>Watering Duration: {wateringDuration} sec</Text>
         <Slider
@@ -148,16 +149,13 @@ export default function WaterPlant({ navigation }) {
           maximumTrackTintColor="#B3E5FC"
           thumbTintColor="#fff"
         />
-  
-        {/* Numbers Below the Slider */}
         <View style={styles.sliderLabels}>
           <Text style={styles.sliderLabel}>2s</Text>
           <Text style={styles.sliderLabel}>5s</Text>
           <Text style={styles.sliderLabel}>10s</Text>
         </View>
       </View>
-  
-      {/* Enable Auto Watering Toggle */}
+
       <View style={styles.autoWateringContainer}>
         <Text style={styles.autoWateringText}>Enable Automatic Watering</Text>
         <Switch
@@ -165,8 +163,7 @@ export default function WaterPlant({ navigation }) {
           onValueChange={setIsAutoWateringEnabled}
         />
       </View>
-  
-      {/* Start Watering Button */}
+
       <TouchableOpacity 
         style={[styles.waterButton, isWatering && styles.disabledButton]} 
         onPress={handleWaterPlant}
@@ -174,19 +171,17 @@ export default function WaterPlant({ navigation }) {
       >
         {isWatering ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>START WATERING</Text>}
       </TouchableOpacity>
-  
-      {/* View History Button */}
+
       <TouchableOpacity 
         style={styles.historyButton} 
         onPress={() => navigation.navigate('WaterHistory')}
       >
         <Text style={styles.buttonText}>VIEW HISTORY</Text>
       </TouchableOpacity>
-  
+
       <ScheduleWater onScheduleSet={(date) => console.log(`Scheduled at: ${date}`)} />
     </LinearGradient>
   );
-  
 }
 
 const styles = StyleSheet.create({
@@ -195,7 +190,6 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     alignItems: 'center',
   },
-  
   header: {
     flexDirection: 'row',
     width: '90%',
@@ -203,13 +197,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
   },
-
   plantContainer: {
     marginTop: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -217,73 +209,40 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
   },
-
-  statusContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-    marginVertical: 20,
-  },
-
-  statusBox: {
-    alignItems: 'center',
-    padding: 10,
-  },
-
-  statusLabel: {
-    fontSize: 14,
-    color: '#fff',
-    textTransform: 'uppercase',
-  },
-
-  statusValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginTop: 5,
-  },
-
   sliderContainer: {
     width: '80%',
     alignItems: 'center',
     marginTop: 10,
   },
-
   sliderText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 5,
   },
-
   slider: {
     width: '100%',
   },
-
   sliderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginTop: 5,
   },
-
   sliderLabel: {
     fontSize: 14,
     color: '#fff',
   },
-
   autoWateringContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
   },
-
   autoWateringText: {
     fontSize: 16,
     color: '#fff',
     marginRight: 10,
   },
-
   waterButton: {
     width: '80%',
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
@@ -294,7 +253,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#fff',
   },
-
   historyButton: {
     width: '80%',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -305,15 +263,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#fff',
   },
-
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
   },
-
   disabledButton: {
     opacity: 0.5,
   },
 });
-

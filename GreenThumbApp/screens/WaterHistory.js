@@ -47,20 +47,30 @@ export default function WaterHistory({ navigation }) {
     }
   };
 
-  // Prepare data for Bar Chart (counts watering frequency per day)
   const getChartData = () => {
     const dayCounts = {};
-
+  
     wateringHistory.forEach((entry) => {
-      const date = entry.split(',')[0]; // Extract date part
-      dayCounts[date] = (dayCounts[date] || 0) + 1;
+      const datePart = entry.split(',')[0].trim(); // Use the exact saved date text
+      dayCounts[datePart] = (dayCounts[datePart] || 0) + 1;
     });
-
-    const labels = Object.keys(dayCounts);
-    const data = Object.values(dayCounts);
-
+  
+    const sortedDates = Object.keys(dayCounts);
+  
+    // No parsing, just use date strings
+    const labels = sortedDates.map(date => {
+      const parts = date.split('/'); // "4/28/2025" -> ["4", "28", "2025"]
+      if (parts.length === 3) {
+        return `${parts[0]}/${parts[1]}`; // just show MM/DD
+      }
+      return date; // fallback
+    });
+  
+    const data = sortedDates.map(date => dayCounts[date]);
+  
     return { labels, data };
   };
+  
 
   const chartData = getChartData();
   const mostRecentSession = wateringHistory.length > 0 ? wateringHistory[0] : "No history available.";
@@ -81,36 +91,35 @@ export default function WaterHistory({ navigation }) {
       {/* Watering Frequency Chart */}
       {chartData.labels.length > 0 && (
         <View style={styles.chartContainer}>
-  <Text style={styles.sectionTitle}>Watering Frequency Chart</Text>
-  <View style={styles.chartBox}>
-    <BarChart
-      data={{
-        labels: chartData.labels,
-        datasets: [{ data: chartData.data }],
-      }}
-      width={300} // Reduce width for better spacing
-      height={220}
-      yAxisLabel=""
-      chartConfig={{
-        backgroundColor: '#ffffff',
-        backgroundGradientFrom: '#ffffff',
-        backgroundGradientTo: '#ffffff',
-        decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(46, 111, 64, ${opacity})`, // Green bars
-        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Black text
-        barPercentage: 0.6,
-        propsForBackgroundLines: {
-          strokeWidth: 0, // Remove background grid lines
-        },
-        propsForLabels: {
-          fontSize: 12, // Adjust font size
-        },
-      }}
-      style={styles.chartStyle}
-    />
-  </View>
-</View>
-
+          <Text style={styles.sectionTitle}>Watering Frequency Chart</Text>
+          <View style={styles.chartBox}>
+            <BarChart
+              data={{
+                labels: chartData.labels,
+                datasets: [{ data: chartData.data }],
+              }}
+              width={300}
+              height={220}
+              yAxisLabel=""
+              chartConfig={{
+                backgroundColor: '#ffffff',
+                backgroundGradientFrom: '#ffffff',
+                backgroundGradientTo: '#ffffff',
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(46, 111, 64, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                barPercentage: 0.6,
+                propsForBackgroundLines: {
+                  strokeWidth: 0,
+                },
+                propsForLabels: {
+                  fontSize: 12,
+                },
+              }}
+              style={styles.chartStyle}
+            />
+          </View>
+        </View>
       )}
 
       {/* Recent Watering Session */}
@@ -130,14 +139,14 @@ export default function WaterHistory({ navigation }) {
           </TouchableOpacity>
         )}
 
-        {/* Older Watering Sessions (Visible when dropdown is open) */}
+        {/* Older Watering Sessions */}
         {isDropdownOpen && wateringHistory.length > 1 && (
           <FlatList
-            data={wateringHistory.slice(1)} // Exclude the most recent session
+            data={wateringHistory.slice(1)}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <View style={styles.historyItemContainer}>
-                <Text style={styles.historyItemText}>💧 {item}</Text>
+                <Text style={styles.historyItemText}>{item}</Text>
               </View>
             )}
             nestedScrollEnabled={true}
@@ -200,7 +209,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    fontWeight: '600',
     marginLeft: 10,
   },
   sectionTitle: {

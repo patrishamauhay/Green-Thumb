@@ -109,7 +109,6 @@ export default function Home({ navigation }) {
         )}
       </View>
 
-      
       {/* Water Tank Level Section */}
       <View style={styles.waterContainer}>
         <Text style={styles.sectionTitle}>Water Tank Level</Text>
