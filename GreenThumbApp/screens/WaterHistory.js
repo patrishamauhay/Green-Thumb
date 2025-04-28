@@ -51,26 +51,24 @@ export default function WaterHistory({ navigation }) {
     const dayCounts = {};
   
     wateringHistory.forEach((entry) => {
-      const datePart = entry.split(',')[0].trim(); // Use the exact saved date text
+      const datePart = entry.split(',')[0].trim();
       dayCounts[datePart] = (dayCounts[datePart] || 0) + 1;
     });
   
-    const sortedDates = Object.keys(dayCounts);
+    const sortedDates = Object.keys(dayCounts).sort((a, b) => new Date(a) - new Date(b));
   
-    // No parsing, just use date strings
     const labels = sortedDates.map(date => {
-      const parts = date.split('/'); // "4/28/2025" -> ["4", "28", "2025"]
-      if (parts.length === 3) {
-        return `${parts[0]}/${parts[1]}`; // just show MM/DD
+      const [month, day, year] = date.split('/');
+      if (month && day) {
+        return `${day}/${month}`; // Show as DD/MM
       }
-      return date; // fallback
+      return date;
     });
   
     const data = sortedDates.map(date => dayCounts[date]);
   
     return { labels, data };
-  };
-  
+  };  
 
   const chartData = getChartData();
   const mostRecentSession = wateringHistory.length > 0 ? wateringHistory[0] : "No history available.";
@@ -93,31 +91,55 @@ export default function WaterHistory({ navigation }) {
         <View style={styles.chartContainer}>
           <Text style={styles.sectionTitle}>Watering Frequency Chart</Text>
           <View style={styles.chartBox}>
-            <BarChart
-              data={{
-                labels: chartData.labels,
-                datasets: [{ data: chartData.data }],
-              }}
-              width={300}
-              height={220}
-              yAxisLabel=""
-              chartConfig={{
-                backgroundColor: '#ffffff',
-                backgroundGradientFrom: '#ffffff',
-                backgroundGradientTo: '#ffffff',
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(46, 111, 64, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                barPercentage: 0.6,
-                propsForBackgroundLines: {
-                  strokeWidth: 0,
-                },
-                propsForLabels: {
-                  fontSize: 12,
-                },
-              }}
-              style={styles.chartStyle}
-            />
+          <BarChart
+            data={{
+              labels: chartData.labels,
+              datasets: [{ data: chartData.data }],
+            }}
+            width={320}
+            height={250}
+            fromZero={true}
+            yAxisInterval={1}
+            showValuesOnTopOfBars={true}
+            chartConfig={{
+              backgroundColor: '#ffffff',
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              decimalPlaces: 0,
+              color: (opacity = 1, index) => {
+                if (index !== undefined && chartData.data.length > index) {
+                  const wateringCount = chartData.data[index];
+                  if (wateringCount <= 2) {
+                    return `rgba(180, 255, 200, ${opacity})`;
+                  } else if (wateringCount <= 5) {
+                    return `rgba(60, 180, 100, ${opacity})`;
+                  } else {
+                    return `rgba(20, 90, 50, ${opacity})`;
+                  }
+                }
+                return `rgba(20, 90, 50, ${opacity})`;
+              },
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              barPercentage: 0.6,
+              propsForBackgroundLines: {
+                strokeWidth: 0,
+              },
+              propsForLabels: {
+                fontSize: 12,
+              },
+            }}
+            style={styles.chartStyle}
+            onDataPointClick={({ index }) => {
+              if (index < chartData.labels.length - 1) { // Ignore last dummy bar
+                const date = chartData.labels[index];
+                const count = chartData.data[index];
+                Alert.alert(
+                  "Watering Details",
+                  `Date: ${date}\nWatered: ${count} times`
+                );
+              }
+            }}
+          />
           </View>
         </View>
       )}
@@ -150,6 +172,7 @@ export default function WaterHistory({ navigation }) {
               </View>
             )}
             nestedScrollEnabled={true}
+            scrollEnabled={false}
             style={styles.flatList}
           />
         )}
