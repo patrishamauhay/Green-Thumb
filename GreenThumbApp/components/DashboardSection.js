@@ -89,6 +89,14 @@ const DashboardSection = ({ plantId, docId }) => {
   if (percentage > 80) arcColor = "#4CAF50";
   else if (percentage >= 30 && percentage <= 80) arcColor = "#FFC107";
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const day = date.getDate();
+    const monthShort = date.toLocaleString('default', { month: 'short' }); // e.g., Apr
+    return `${monthShort} ${day}`; 
+  };
+  
   return (
     <ScrollView
       style={styles.container}
@@ -174,8 +182,8 @@ const DashboardSection = ({ plantId, docId }) => {
         <LineChart
           data={{
             labels: moistureHistory.length > 0
-              ? moistureHistory.map((_, index) => `T${index + 1}`)
-              : ['T1', 'T2', 'T3', 'T4', 'T5'],
+              ? moistureHistory.map(entry => formatDate(entry.time))
+              : ['Apr 24', 'Apr 25', 'Apr 26', 'Apr 27', 'Apr 28'],
             datasets: [
               {
                 data: moistureHistory.length > 0
@@ -186,6 +194,7 @@ const DashboardSection = ({ plantId, docId }) => {
               },
             ],
           }}
+
           width={width * 0.85}
           height={220}
           yAxisSuffix="%"
