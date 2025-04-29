@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Switch, Alert, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Switch, Alert, Dimensions, ScrollView } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
 import Svg, { Circle, Text as SvgText } from "react-native-svg";
@@ -85,12 +85,17 @@ const DashboardSection = ({ plantId, docId }) => {
   const soilMoisture = sensorData?.["Soil Moisture"] || 0;
   const percentage = Math.min(100, Math.max(0, soilMoisture));
 
-  let arcColor = "#D32F2F"; // Default red
-  if (percentage > 80) arcColor = "#4CAF50"; // Green
-  else if (percentage >= 30 && percentage <= 80) arcColor = "#FFC107"; // Orange
+  let arcColor = "#D32F2F";
+  if (percentage > 80) arcColor = "#4CAF50";
+  else if (percentage >= 30 && percentage <= 80) arcColor = "#FFC107";
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1, alignItems: "center", paddingBottom: 60 }}
+      showsVerticalScrollIndicator={false}
+    >
+
       {errorMessage && <Text style={styles.errorText}>⚠️ {errorMessage}</Text>}
 
       <View style={styles.rowContainer}>
@@ -99,7 +104,6 @@ const DashboardSection = ({ plantId, docId }) => {
           <Text style={styles.labelTitle}>Soil Moisture</Text>
           <View style={styles.progressContainer}>
             <Svg width={120} height={120}>
-              {/* Background Circle */}
               <Circle
                 cx="60"
                 cy="60"
@@ -108,7 +112,6 @@ const DashboardSection = ({ plantId, docId }) => {
                 strokeWidth="12"
                 fill="none"
               />
-              {/* Progress Circle */}
               <Circle
                 cx="70"
                 cy="70"
@@ -122,7 +125,6 @@ const DashboardSection = ({ plantId, docId }) => {
                 rotation="-90"
                 origin="70,70"
               />
-              {/* Percentage Text */}
               <SvgText
                 x="60"
                 y="65"
@@ -134,8 +136,6 @@ const DashboardSection = ({ plantId, docId }) => {
                 {percentage.toFixed(1)}%
               </SvgText>
             </Svg>
-
-            {/* Status Text */}
             <Text style={[styles.statusText, { color: arcColor }]}>
               {percentage < 30
                 ? "🟥 Low"
@@ -205,7 +205,7 @@ const DashboardSection = ({ plantId, docId }) => {
           bezier
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -214,14 +214,13 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    alignItems: "center",
+    backgroundColor: "#F5F5F5",
   },
   rowContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 20,
     width: width * 0.9,
   },
   card: {
@@ -254,14 +253,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    marginLeft: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
-    marginLeft: 10,
   },
   chartCard: {
     marginTop: 20,
@@ -274,11 +271,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
+    paddingBottom: 35,
   },
   errorText: {
     color: "red",
     fontSize: 14,
-    marginBottom: 10,
+    marginTop: 10,
   },
 });
 
