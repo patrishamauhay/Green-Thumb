@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, { Circle, Text as SvgText } from 'react-native-svg';
 
-const LightLevelChart = ({ value = 65 }) => {
+const LightLevelChart = ({ value = 0 }) => {
   const size = 140;
   const strokeWidth = 14;
   const radius = (size - strokeWidth) / 2;
@@ -26,7 +26,7 @@ const LightLevelChart = ({ value = 65 }) => {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#FFA500" // orange color for light
+          stroke="#FFA500" // orange color
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
@@ -44,7 +44,7 @@ const LightLevelChart = ({ value = 65 }) => {
           fontWeight="bold"
           fill="#FFA500"
         >
-          {value}%
+          {`${value.toFixed(0)}%`}
         </SvgText>
       </Svg>
     </View>

@@ -47,10 +47,18 @@ export default function Home({ navigation }) {
           }));
           setMyGarden(plantList);
           setLoading(false);
+  
+          if (plantList.length > 0 && plantList[0].latestSensorData) {
+            const light = plantList[0].latestSensorData["Light"];
+            if (typeof light === 'number') {
+              setLightLevel(light);
+            }
+          }
         });
       return unsubscribe;
     }
   }, [userId]);
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -121,8 +129,8 @@ export default function Home({ navigation }) {
       {/* Light Sensor Section */}
     <View style={styles.waterContainer}>
       <Text style={styles.sectionTitle}>Light Level</Text>
-      <LightLevelChart value={65} />
-    </View>
+      <LightLevelChart value={lightLevel || 0} />
+      </View>
 
     </ScrollView>
   );

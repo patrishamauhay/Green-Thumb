@@ -110,8 +110,10 @@ const DashboardSection = ({ plantId, docId }) => {
     const matchingEntry = moistureHistory.find(entry => 
       moment(entry.time).format('MMM D') === dayLabel
     );
-    return matchingEntry ? matchingEntry.value : 0; // Default to 0 if no data
-  });
+    return matchingEntry
+      ? { value: matchingEntry.value, real: true }
+      : { value: 0, real: false };
+  });  
   
   return (
     <ScrollView
@@ -200,7 +202,7 @@ const DashboardSection = ({ plantId, docId }) => {
             labels: last7Days,
             datasets: [
               {
-                data: alignedMoistureData,
+                data: alignedMoistureData.map(item => item.value),
                 color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`, 
                 strokeWidth: 3,
               },
@@ -221,11 +223,13 @@ const DashboardSection = ({ plantId, docId }) => {
               strokeWidth: "2",
               stroke: "#4CAF50",
             },
+            getDotColor: (dataPoint, index) => {
+              return alignedMoistureData[index].real ? "#4CAF50" : "#BDBDBD"; 
+            },
           }}
           bezier
         />
-
-              </View>
+      </View>
     </ScrollView>
   );
 };

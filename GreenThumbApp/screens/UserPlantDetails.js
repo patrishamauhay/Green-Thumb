@@ -70,6 +70,36 @@ export default function UserPlantDetails({ route, navigation }) {
     );
   }
 
+  const handleDeletePlant = () => {
+    Alert.alert(
+      'Delete Plant',
+      'Are you sure you want to delete this plant?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await firestore()
+                .collection('users')
+                .doc(userId)
+                .collection('myGarden')
+                .doc(docId)
+                .delete();
+              Alert.alert('Deleted', 'Your plant has been deleted.');
+              navigation.goBack();
+            } catch (error) {
+              console.error('Error deleting plant:', error);
+              Alert.alert('Error', 'Failed to delete plant. Please try again.');
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+  
   return (
     <View style={styles.container}>
       {/* Back Button */}
@@ -95,7 +125,7 @@ export default function UserPlantDetails({ route, navigation }) {
           {plant.commonName || 'Unknown Species'}
         </Text>
       </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleDeletePlant}>
           <Ionicons name="settings-outline" size={24} color="white" />
         </TouchableOpacity>
       </LinearGradient>
