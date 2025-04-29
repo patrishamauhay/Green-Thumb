@@ -4,6 +4,7 @@ import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
 import Svg, { Circle, Text as SvgText } from "react-native-svg";
 import { LineChart } from "react-native-chart-kit";
+import moment from 'moment';
 
 const DashboardSection = ({ plantId, docId }) => {
   const [isActivated, setIsActivated] = useState(false);
@@ -92,10 +93,25 @@ const DashboardSection = ({ plantId, docId }) => {
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
-    const day = date.getDate();
-    const monthShort = date.toLocaleString('default', { month: 'short' }); // e.g., Apr
-    return `${monthShort} ${day}`; 
+    return `${date.getDate()}/${date.getMonth() + 1}`; // Example: 28/4
   };
+
+  const generateLast7Days = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      days.push(moment().subtract(i, 'days').format('MMM D'));
+    }
+    return days;
+  };
+  
+  const last7Days = generateLast7Days();
+  
+  const alignedMoistureData = last7Days.map((dayLabel) => {
+    const matchingEntry = moistureHistory.find(entry => 
+      moment(entry.time).format('MMM D') === dayLabel
+    );
+    return matchingEntry ? matchingEntry.value : 0; // Default to 0 if no data
+  });
   
   return (
     <ScrollView
@@ -181,20 +197,15 @@ const DashboardSection = ({ plantId, docId }) => {
         <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
         <LineChart
           data={{
-            labels: moistureHistory.length > 0
-              ? moistureHistory.map(entry => formatDate(entry.time))
-              : ['Apr 24', 'Apr 25', 'Apr 26', 'Apr 27', 'Apr 28'],
+            labels: last7Days,
             datasets: [
               {
-                data: moistureHistory.length > 0
-                  ? moistureHistory.map(entry => entry.value)
-                  : [0, 0, 0, 0, 0],
-                color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+                data: alignedMoistureData,
+                color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`, 
                 strokeWidth: 3,
               },
             ],
           }}
-
           width={width * 0.85}
           height={220}
           yAxisSuffix="%"
@@ -213,7 +224,8 @@ const DashboardSection = ({ plantId, docId }) => {
           }}
           bezier
         />
-      </View>
+
+              </View>
     </ScrollView>
   );
 };
