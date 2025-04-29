@@ -129,39 +129,41 @@ const DashboardSection = ({ plantId, docId }) => {
         <View style={styles.card}>
           <Text style={styles.labelTitle}>Soil Moisture</Text>
           <View style={styles.progressContainer}>
-            <Svg width={120} height={120}>
-              <Circle
-                cx="60"
-                cy="60"
-                r="50"
-                stroke="#E0E0E0"
-                strokeWidth="12"
-                fill="none"
-              />
-              <Circle
-                cx="70"
-                cy="70"
-                r="60"
-                stroke={arcColor}
-                strokeWidth="12"
-                fill="none"
-                strokeDasharray={2 * Math.PI * 60}
-                strokeDashoffset={2 * Math.PI * 60 * (1 - percentage / 100)}
-                strokeLinecap="round"
-                rotation="-90"
-                origin="70,70"
-              />
-              <SvgText
-                x="60"
-                y="65"
-                textAnchor="middle"
-                fontSize="20"
-                fontWeight="bold"
-                fill={arcColor}
-              >
-                {percentage.toFixed(1)}%
-              </SvgText>
-            </Svg>
+          <Svg width={120} height={120}>
+            {/* Background Circle */}
+            <Circle
+              cx="60"
+              cy="60"
+              r="50"
+              stroke="#E0E0E0"
+              strokeWidth="12"
+              fill="none"
+            />
+            {/* Progress Circle */}
+            <Circle
+              cx="60"
+              cy="60"
+              r="50"
+              stroke={arcColor}
+              strokeWidth="12"
+              fill="none"
+              strokeDasharray={2 * Math.PI * 50}
+              strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
+              strokeLinecap="round"
+              transform="rotate(-90 60 60)"  // ✅ Use SVG rotate transform properly
+            />
+            <SvgText
+              x="60"
+              y="65"
+              textAnchor="middle"
+              fontSize="20"
+              fontWeight="bold"
+              fill={arcColor}
+            >
+              {percentage.toFixed(1)}%
+            </SvgText>
+          </Svg>
+
             <Text style={[styles.statusText, { color: arcColor }]}>
               {percentage < 30
                 ? "🟥 Low"

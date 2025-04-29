@@ -21,7 +21,7 @@ def get_active_user():
 
         for user_doc in users_docs:
             print(f"Found active user: {user_doc.id}")
-            return user_doc.id  # ✅ Return the first active user found
+            return user_doc.id  
 
     except Exception as e:
         print(f"Error fetching active user: {e}")
@@ -37,8 +37,8 @@ def get_active_plant(user_id):
 
         if user_doc.exists:
             user_data = user_doc.to_dict()
-            plant_id = user_data.get("activeSensorPlant")  # ✅ Use .get() to avoid KeyError
-            print(f"✅ Found active plant for user {user_id}: {plant_id}")
+            plant_id = user_data.get("activeSensorPlant")  
+            print(f"Found active plant for user {user_id}: {plant_id}")
             return str(plant_id) if plant_id else None
 
     except Exception as e:

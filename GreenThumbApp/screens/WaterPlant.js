@@ -13,8 +13,10 @@ import 'react-native-url-polyfill/auto';
 import PushNotification from 'react-native-push-notification';
 import ScheduleWater from '../components/ScheduleWater';
 
-const MQTT_BROKER = "ws://test.mosquitto.org:8080"; // WebSocket connection for MQTT
-const TOPIC = "relay_control"; 
+const MQTT_BROKER = "ws://test.mosquitto.org:8080";
+const MOISTURE_TOPIC = "plant/sensor/moisture";
+const RELAY_TOPIC = "relay_control";
+const MOISTURE_THRESHOLD = 30;
 
 export default function WaterPlant({ navigation }) {
   const [lastWatered, setLastWatered] = useState(null);
@@ -24,150 +26,100 @@ export default function WaterPlant({ navigation }) {
   const [isAutoWateringEnabled, setIsAutoWateringEnabled] = useState(false);
   const [soilMoisture, setSoilMoisture] = useState(0);
 
-  const MOISTURE_THRESHOLD = 30;
-
   useEffect(() => {
-    // Connect to MQTT broker
     const mqttClient = mqtt.connect(MQTT_BROKER);
 
     mqttClient.on("connect", () => {
-      console.log("Connected to MQTT broker");
+      console.log("✅ Connected to MQTT broker");
+      mqttClient.subscribe(MOISTURE_TOPIC);
     });
 
-    mqttClient.on("error", (err) => {
-      console.error("MQTT Error:", err);
+    mqttClient.on("message", async (topic, message) => {
+      if (topic === MOISTURE_TOPIC) {
+        const moisture = parseInt(message.toString(), 10);
+        console.log("📡 Moisture Received:", moisture);
+        setSoilMoisture(moisture);
+        if (moisture < MOISTURE_THRESHOLD && isAutoWateringEnabled) {
+          const today = new Date().toISOString().split('T')[0];
+          const lastAutoWatered = await AsyncStorage.getItem('lastAutoWatered');
+          if (lastAutoWatered !== today) {
+            Alert.alert(
+              "Low Moisture Detected",
+              `Soil moisture is ${moisture}%. Start watering?`,
+              [
+                { text: "No", style: "cancel" },
+                {
+                  text: "Yes", onPress: () => {
+                    PushNotification.localNotification({
+                      channelId: "plant-care-channel",
+                      title: "Watering Started",
+                      message: `Watering started automatically due to low moisture.`,
+                    });
+                    AsyncStorage.setItem('lastAutoWatered', today);
+                    handleWaterPlant();
+                  }
+                }
+              ]
+            );
+          } else {
+            console.log("ℹ️ Already watered today.");
+          }
+        }
+      }
     });
 
+    mqttClient.on("error", (err) => console.error("MQTT Error:", err));
     setClient(mqttClient);
-
-    return () => {
-      mqttClient.end();
-    };
-  }, []);
+    return () => mqttClient.end();
+  }, [isAutoWateringEnabled]);
 
   useEffect(() => {
-    // Load last watering time
     loadLastWatered();
 
-    // Configure Push Notifications
     PushNotification.configure({
-      onNotification: function (notification) {
-        console.log("Local Notification Received:", notification);
-      },
+      onNotification: notification => console.log("🔔 Notification:", notification),
       requestPermissions: Platform.OS === 'ios',
     });
 
-    // Create Notification Channel (IMPORTANT)
-    PushNotification.createChannel(
-      {
-        channelId: "plant-care-channel", // (required)
-        channelName: "Plant Care Alerts", // (required)
-        channelDescription: "A channel for plant watering and moisture alerts",
-        importance: 4, // Max
-        vibrate: true,
-      },
-      (created) => console.log(`createChannel returned '${created}'`)
-    );
+    PushNotification.createChannel({
+      channelId: "plant-care-channel",
+      channelName: "Plant Care Alerts",
+      channelDescription: "Alerts for moisture and watering",
+      importance: 4,
+      vibrate: true,
+    });
 
-    // Request Notification Permission on Android 13+
     if (Platform.OS === 'android' && Platform.Version >= 33) {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS)
-        .then((result) => {
-          if (result === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log("Notification permission granted.");
-          } else {
-            console.log("Notification permission denied.");
-          }
-        });
+      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
     }
-
-    // Auto-watering interval if enabled
-    if (isAutoWateringEnabled) {
-      const interval = setInterval(() => {
-        checkSoilMoisture();
-      }, 15000); // every 15 seconds now
-      return () => clearInterval(interval);
-    }
-  }, [isAutoWateringEnabled]);
+  }, []);
 
   const loadLastWatered = async () => {
-    try {
-      const storedTime = await AsyncStorage.getItem('lastWatered');
-      if (storedTime) {
-        setLastWatered(storedTime);
-      }
-    } catch (error) {
-      console.error('Failed to load watering data', error);
-    }
+    const storedTime = await AsyncStorage.getItem('lastWatered');
+    if (storedTime) setLastWatered(storedTime);
   };
 
   const pushWateringEntry = async (entry) => {
-    try {
-      const raw = await AsyncStorage.getItem('wateringHistory');
-      const history = raw ? JSON.parse(raw) : [];
-      const newHistory = [entry, ...history];
-      await AsyncStorage.setItem('wateringHistory', JSON.stringify(newHistory));
-    } catch (error) {
-      console.error('Failed to save watering history', error);
-    }
+    const raw = await AsyncStorage.getItem('wateringHistory');
+    const history = raw ? JSON.parse(raw) : [];
+    await AsyncStorage.setItem('wateringHistory', JSON.stringify([entry, ...history]));
   };
-
-  const [lastMoistureAlert, setLastMoistureAlert] = useState(false);
-
-  const checkSoilMoisture = () => {
-    // In future: Read real sensor value here
-    const moistureLevel = Math.floor(Math.random() * 100); // Simulate sensor
-    setSoilMoisture(moistureLevel);
-    console.log(`Soil Moisture: ${moistureLevel}%`);
-  
-    if (moistureLevel < MOISTURE_THRESHOLD) {
-      if (!lastMoistureAlert) { 
-        PushNotification.localNotification({
-          channelId: "plant-care-channel",
-          title: "Low Moisture Alert ",
-          message: `Soil moisture is low (${moistureLevel}%). Please water your plant!`,
-          playSound: true,
-          soundName: 'default',
-          vibrate: true,
-        });
-        setLastMoistureAlert(true);
-      }
-      handleWaterPlant();
-    } else {
-      setLastMoistureAlert(false);
-    }
-  };
-  
 
   const sendMQTTMessage = (message) => {
-    if (client) {
-      client.publish(TOPIC, message);
-      console.log(`Sent MQTT Message: ${message}`);
-    } else {
-      console.error("MQTT Client is not connected");
-    }
+    if (client) client.publish(RELAY_TOPIC, message);
   };
 
   const handleWaterPlant = async () => {
     setIsWatering(true);
-
     sendMQTTMessage("ON");
 
     setTimeout(async () => {
       sendMQTTMessage("OFF");
-
       const now = new Date().toLocaleString();
       setLastWatered(now);
-
-      try {
-        await AsyncStorage.setItem('lastWatered', now);
-        const entry = `${now}, ${wateringDuration}s`;
-        await pushWateringEntry(entry);
-        Alert.alert('Success', `Your plant has been watered for ${wateringDuration} seconds!`);
-      } catch (error) {
-        console.error('Failed to save watering data', error);
-      }
-
+      await AsyncStorage.setItem('lastWatered', now);
+      await pushWateringEntry(`${now}, ${wateringDuration}s`);
+      Alert.alert('Success', `Watered for ${wateringDuration} seconds.`);
       setIsWatering(false);
     }, wateringDuration * 1000);
   };
@@ -175,15 +127,16 @@ export default function WaterPlant({ navigation }) {
   return (
     <LinearGradient colors={['#26f2bc', '#5B86E5']} style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}></TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()} />
         <Text style={styles.title}>Water Plant</Text>
-        <TouchableOpacity>
-          <Ionicons name="settings-outline" size={28} color="#fff" />
-        </TouchableOpacity>
+        <Ionicons name="settings-outline" size={28} color="#fff" />
       </View>
 
       <View style={styles.plantContainer}>
         <Ionicons name="leaf-outline" size={80} color="white" />
+        <Text style={{ color: '#fff', marginTop: 10, fontSize: 18 }}>
+          Soil Moisture: {soilMoisture}%
+        </Text>
       </View>
 
       <View style={styles.sliderContainer}>
@@ -194,7 +147,7 @@ export default function WaterPlant({ navigation }) {
           maximumValue={10}
           step={1}
           value={wateringDuration}
-          onValueChange={(value) => setWateringDuration(value)}
+          onValueChange={setWateringDuration}
           minimumTrackTintColor="#fff"
           maximumTrackTintColor="#B3E5FC"
           thumbTintColor="#fff"
@@ -207,43 +160,39 @@ export default function WaterPlant({ navigation }) {
       </View>
 
       <View style={styles.autoWateringContainer}>
-        <Text style={styles.autoWateringText}>Enable Automatic Watering</Text>
-        <Switch
-          value={isAutoWateringEnabled}
-          onValueChange={setIsAutoWateringEnabled}
-        />
+        <Text style={styles.autoWateringText}>Enable Auto Watering</Text>
+        <Switch value={isAutoWateringEnabled} onValueChange={setIsAutoWateringEnabled} />
       </View>
 
-      <TouchableOpacity 
-        style={[styles.waterButton, isWatering && styles.disabledButton]} 
+      <TouchableOpacity
+        style={[styles.waterButton, isWatering && styles.disabledButton]}
         onPress={handleWaterPlant}
         disabled={isWatering}
       >
         {isWatering ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>START WATERING</Text>}
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.historyButton} 
+      <TouchableOpacity
+        style={styles.historyButton}
         onPress={() => navigation.navigate('WaterHistory')}
       >
         <Text style={styles.buttonText}>VIEW HISTORY</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      {/* <TouchableOpacity
         style={styles.testButton}
         onPress={() => {
           PushNotification.localNotification({
             channelId: "plant-care-channel",
             title: "Test Notification",
-            message: "This is a test! Notifications are working",
+            message: "This is a test alert!",
             playSound: true,
-            soundName: 'default',
             vibrate: true,
           });
         }}
       >
         <Text style={styles.buttonText}>TEST NOTIFICATION</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <ScheduleWater onScheduleSet={(date) => console.log(`Scheduled at: ${date}`)} />
     </LinearGradient>
