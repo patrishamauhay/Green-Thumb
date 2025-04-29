@@ -17,7 +17,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WaterLevelChart from '../components/WaterLevelChart';
 import LightLevelChart from '../components/LightLevelChart';
 
-
 const { width, height } = Dimensions.get("window");
 
 export default function Home({ navigation }) {
@@ -27,7 +26,6 @@ export default function Home({ navigation }) {
   const [loading, setLoading] = useState(true);
   const userId = auth().currentUser?.uid;
 
-  // Fetch garden data from Firestore
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(setUser);
     return () => unsubscribe();
@@ -47,23 +45,32 @@ export default function Home({ navigation }) {
           }));
           setMyGarden(plantList);
           setLoading(false);
-  
-          if (plantList.length > 0 && plantList[0].latestSensorData) {
+
+          // ➡️ Detect active plant (Activated: true)
+          const activePlant = plantList.find(plant => plant.Activated === true);
+
+          if (activePlant && activePlant.latestSensorData) {
+            const light = activePlant.latestSensorData["Light"];
+            if (typeof light === 'number') {
+              setLightLevel(light);
+            }
+          } else if (plantList.length > 0 && plantList[0].latestSensorData) {
+            // fallback: use first plant if no active plant
             const light = plantList[0].latestSensorData["Light"];
             if (typeof light === 'number') {
               setLightLevel(light);
             }
+          } else {
+            setLightLevel(0);
           }
         });
       return unsubscribe;
     }
   }, [userId]);
-  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      
-      {/* Header Section */}
+      {/* Header */}
       <View style={styles.headerContainer}>
         <Image 
           source={require("../assets/images/Home_Background.png")}  
@@ -73,7 +80,7 @@ export default function Home({ navigation }) {
         <Text style={styles.welcomeText}>Welcome, {user?.displayName || 'Gardener'}!</Text>
       </View>
 
-      {/* Search Bar Section */}
+      {/* Search */}
       <View style={styles.searchBarContainer}>
         <TouchableOpacity 
           style={styles.searchBar} 
@@ -84,7 +91,7 @@ export default function Home({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* My Garden Section */}
+      {/* Garden */}
       <View style={styles.gardenContainer}>
         <Text style={styles.sectionTitle}>🌿 My Garden</Text>
         
@@ -120,16 +127,29 @@ export default function Home({ navigation }) {
         )}
       </View>
 
-      {/* Water Tank Level Section */}
+      {/* Water Tank */}
       <View style={styles.waterContainer}>
         <Text style={styles.sectionTitle}>Water Tank Level</Text>
         <WaterLevelChart value={75} />
       </View>
 
-      {/* Light Sensor Section */}
-    <View style={styles.waterContainer}>
-      <Text style={styles.sectionTitle}>Light Level</Text>
-      <LightLevelChart value={lightLevel || 0} />
+      {/* Light Sensor */}
+      <View style={styles.waterContainer}>
+        <Text style={styles.sectionTitle}>Light Level</Text>
+        <LightLevelChart value={lightLevel || 0} />
+        
+        {/* ➡️ Light Status */}
+        {lightLevel !== null && (
+          <Text style={[
+            styles.statusText,
+            { color: 
+              lightLevel < 30 ? '#D32F2F' :
+              lightLevel <= 80 ? '#FFC107' : '#4CAF50'
+            }
+          ]}>
+            {lightLevel < 30 ? "🟥 Low" : lightLevel <= 80 ? "🟧 Moderate" : "🟩 Good"}
+          </Text>
+        )}
       </View>
 
     </ScrollView>
@@ -137,18 +157,9 @@ export default function Home({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  headerContainer: {
-    alignItems: 'center',
-    position: 'relative',
-  },
-  backgroundImage: {
-    width: width,
-    height: height * 0.35,
-  },
+  container: { flexGrow: 1, backgroundColor: '#F5F5F5' },
+  headerContainer: { alignItems: 'center', position: 'relative' },
+  backgroundImage: { width: width, height: height * 0.35 },
   welcomeText: {
     position: 'absolute',
     top: '6%',
@@ -157,10 +168,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginRight: 130,
   },
-  searchBarContainer: {
-    alignItems: 'center',
-    marginTop: 15,
-  },
+  searchBarContainer: { alignItems: 'center', marginTop: 15 },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -170,13 +178,8 @@ const styles = StyleSheet.create({
     width: '90%',
     elevation: 2,
   },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchPlaceholder: {
-    fontSize: 16,
-    color: '#888',
-  },
+  searchIcon: { marginRight: 10 },
+  searchPlaceholder: { fontSize: 16, color: '#888' },
   gardenContainer: {
     marginTop: 20,
     backgroundColor: '#FFFFFF',
@@ -194,42 +197,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginHorizontal: 16,
     elevation: 2,
-  },
-  quickAccessContainer: {
-    marginTop: 20,
-    backgroundColor: '#FFFFFF',
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 15,
-    marginHorizontal: 16,
-    elevation: 2,
     alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 20, 
-    fontWeight: 'bold',
-    color: '#888',
-    marginBottom: 10,
-  },
-  noPlantsText: {
-    fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  plantCard: {
-    width: 100, 
-    height: 110, 
-    borderRadius: 10,
-    marginRight: 10,
-    elevation: 3,
-  },
-  imageBackground: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#888', marginBottom: 10 },
+  noPlantsText: { fontSize: 16, color: '#888', textAlign: 'center', marginTop: 10 },
+  plantCard: { width: 100, height: 110, borderRadius: 10, marginRight: 10, elevation: 3 },
+  imageBackground: { width: '100%', height: '100%', justifyContent: 'flex-end', alignItems: 'center' },
   nameOverlay: {
     width: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -238,9 +211,10 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
   },
-  plantName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#FFF',
+  plantName: { fontSize: 14, fontWeight: 'bold', color: '#FFF' },
+  statusText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 8,
   },
 });
