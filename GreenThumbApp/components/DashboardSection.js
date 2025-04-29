@@ -1,26 +1,9 @@
-/**
- * DashboardSection Component
- * 
- * This component displays a real-time overview of a plant's sensor data.
- * It shows current soil moisture with a visual gauge, a history line chart,
- * and allows the user to toggle activation of live sensor streaming and control.
- * It uses Firebase Firestore for data syncing and MQTT logic tied to the "Activated" state.
- */
-
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Switch,
-  Alert,
-  Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, Switch, Alert, Dimensions } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
-import Svg, { Path, Text as SvgText, Defs, LinearGradient, Stop } from "react-native-svg";
+import Svg, { Circle, Text as SvgText } from "react-native-svg";
 import { LineChart } from "react-native-chart-kit";
-
 
 const DashboardSection = ({ plantId, docId }) => {
   const [isActivated, setIsActivated] = useState(false);
@@ -61,7 +44,6 @@ const DashboardSection = ({ plantId, docId }) => {
 
   const toggleActivation = async () => {
     if (!userId || !docId) {
-      console.log("Toggling activation...");
       setErrorMessage("Missing userId or plantId.");
       return;
     }
@@ -87,7 +69,6 @@ const DashboardSection = ({ plantId, docId }) => {
           const previousPlantRef = userRef.collection("myGarden").doc(currentlyActivePlant);
           await previousPlantRef.update({ Activated: false });
         }
-
         await userRef.update({ activeSensorPlant: docId, activeSensorUser: userId });
         await plantRef.update({ Activated: true });
         setIsActivated(true);
@@ -104,9 +85,9 @@ const DashboardSection = ({ plantId, docId }) => {
   const soilMoisture = sensorData?.["Soil Moisture"] || 0;
   const percentage = Math.min(100, Math.max(0, soilMoisture));
 
-  let arcColor = "#D32F2F";
-  if (percentage > 75) arcColor = "#4CAF50";
-  else if (percentage >= 30 && percentage <= 75) arcColor = "#FFC107";
+  let arcColor = "#D32F2F"; // Default red
+  if (percentage > 80) arcColor = "#4CAF50"; // Green
+  else if (percentage >= 30 && percentage <= 80) arcColor = "#FFC107"; // Orange
 
   return (
     <View style={styles.container}>
@@ -117,62 +98,57 @@ const DashboardSection = ({ plantId, docId }) => {
         <View style={styles.card}>
           <Text style={styles.labelTitle}>Soil Moisture</Text>
           <View style={styles.progressContainer}>
-            <Svg width={150} height={90} viewBox="0 0 150 90">
-              {/* Background Arc */}
-              <Path
-                d="M 10,80 A 60,60 0 0,1 140,80"
-                fill="none"
+            <Svg width={120} height={120}>
+              {/* Background Circle */}
+              <Circle
+                cx="60"
+                cy="60"
+                r="50"
                 stroke="#E0E0E0"
-                strokeWidth="10"
-                strokeLinecap="round"
-              />
-
-              {/* Gradient Arc */}
-              <Defs>
-                <LinearGradient id="gradient" x1="0" y1="0" x2="1" y2="0">
-                  <Stop offset="0%" stopColor={arcColor} stopOpacity="1" />
-                  <Stop offset="100%" stopColor="#E0E0E0" stopOpacity="0.5" />
-                </LinearGradient>
-              </Defs>
-
-              <Path
-                d="M 10,80 A 60,60 0 0,1 140,80"
+                strokeWidth="12"
                 fill="none"
-                stroke="url(#gradient)"
-                strokeWidth="10"
-                strokeLinecap="round"
-                strokeDasharray={`${(percentage / 100) * 180}, 200`}
-                strokeDashoffset="0"
               />
-
+              {/* Progress Circle */}
+              <Circle
+                cx="70"
+                cy="70"
+                r="60"
+                stroke={arcColor}
+                strokeWidth="12"
+                fill="none"
+                strokeDasharray={2 * Math.PI * 60}
+                strokeDashoffset={2 * Math.PI * 60 * (1 - percentage / 100)}
+                strokeLinecap="round"
+                rotation="-90"
+                origin="70,70"
+              />
               {/* Percentage Text */}
               <SvgText
-                x="75"
-                y="50"
+                x="60"
+                y="65"
                 textAnchor="middle"
-                fontSize="18"
+                fontSize="20"
                 fontWeight="bold"
-                fill="#333"
+                fill={arcColor}
               >
                 {percentage.toFixed(1)}%
               </SvgText>
-
-              {/* Min/Max Labels */}
-              <SvgText x="10" y="85" textAnchor="middle" fontSize="12" fill="#777">
-                0
-              </SvgText>
-              <SvgText x="140" y="85" textAnchor="middle" fontSize="12" fill="#777">
-                100
-              </SvgText>
             </Svg>
+
+            {/* Status Text */}
+            <Text style={[styles.statusText, { color: arcColor }]}>
+              {percentage < 30
+                ? "🟥 Low"
+                : percentage <= 80
+                ? "🟧 Moderate"
+                : "🟩 Good"}
+            </Text>
           </View>
         </View>
 
         {/* Toggle Switch Card */}
         <View style={styles.switchCard}>
-
           <Text style={styles.switchLabel}>Sensor Control</Text>
-
           <Switch
             value={isActivated}
             onValueChange={toggleActivation}
@@ -181,25 +157,21 @@ const DashboardSection = ({ plantId, docId }) => {
             ios_backgroundColor="#ccc"
             style={{ transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }] }}
           />
-
-          <Text
-            style={{
-              marginTop: 8,
-              fontSize: 13,
-              fontWeight: "600",
-              color: isActivated ? "#4CAF50" : "#888",
-            }}
-          >
+          <Text style={{
+            marginTop: 8,
+            fontSize: 13,
+            fontWeight: "600",
+            color: isActivated ? "#4CAF50" : "#888",
+          }}>
             {isActivated ? "Activated" : "Deactivated"}
           </Text>
         </View>
+      </View>
 
-                  </View>
-
-              {/* Moisture History Chart */}
-              <View style={styles.chartCard}>
-                <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
-                <LineChart
+      {/* Moisture History Chart */}
+      <View style={styles.chartCard}>
+        <Text style={styles.labelTitle}>Moisture Levels Over Time</Text>
+        <LineChart
           data={{
             labels: moistureHistory.length > 0
               ? moistureHistory.map((_, index) => `T${index + 1}`)
@@ -209,7 +181,7 @@ const DashboardSection = ({ plantId, docId }) => {
                 data: moistureHistory.length > 0
                   ? moistureHistory.map(entry => entry.value)
                   : [0, 0, 0, 0, 0],
-                color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`, // ✅ Define color function
+                color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
                 strokeWidth: 3,
               },
             ],
@@ -222,8 +194,8 @@ const DashboardSection = ({ plantId, docId }) => {
             backgroundGradientFrom: "#ffffff",
             backgroundGradientTo: "#ffffff",
             decimalPlaces: 1,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define color function
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // ✅ Define labelColor function
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
             propsForDots: {
               r: "4",
               strokeWidth: "2",
@@ -232,13 +204,13 @@ const DashboardSection = ({ plantId, docId }) => {
           }}
           bezier
         />
-
       </View>
     </View>
   );
 };
 
 const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -254,7 +226,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: width * 0.55,
-    height: 160,
+    height: 210,
     backgroundColor: "#fff",
     borderRadius: 12,
     paddingVertical: 20,
@@ -264,23 +236,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
-  }, 
-switchCard: {
-  width: width * 0.3,
-  height: 130, // ⬅️ Reduced
-  backgroundColor: "#fff",
-  borderRadius: 12,
-  justifyContent: "center",
-  alignItems: "center",
-  paddingVertical: 10, // ⬅️ Less vertical padding
-  paddingHorizontal: 10,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 3 },
-  shadowOpacity: 0.15,
-  shadowRadius: 5,
-  elevation: 5,
-  marginLeft: 10,
-},
+  },
+  progressContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 8,
+  },
+  switchCard: {
+    width: width * 0.3,
+    height: 130,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
+    marginLeft: 10,
+  },
   chartCard: {
     marginTop: 20,
     width: width * 0.9,

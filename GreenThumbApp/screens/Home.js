@@ -15,11 +15,14 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WaterLevelChart from '../components/WaterLevelChart';
+import LightLevelChart from '../components/LightLevelChart';
+
 
 const { width, height } = Dimensions.get("window");
 
 export default function Home({ navigation }) {
   const [user, setUser] = useState(null);
+  const [lightLevel, setLightLevel] = useState(null);
   const [myGarden, setMyGarden] = useState([]);
   const [loading, setLoading] = useState(true);
   const userId = auth().currentUser?.uid;
@@ -114,6 +117,13 @@ export default function Home({ navigation }) {
         <Text style={styles.sectionTitle}>Water Tank Level</Text>
         <WaterLevelChart value={75} />
       </View>
+
+      {/* Light Sensor Section */}
+    <View style={styles.waterContainer}>
+      <Text style={styles.sectionTitle}>Light Level</Text>
+      <LightLevelChart value={65} />
+    </View>
+
     </ScrollView>
   );
 }

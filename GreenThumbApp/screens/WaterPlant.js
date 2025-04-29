@@ -85,7 +85,7 @@ export default function WaterPlant({ navigation }) {
     if (isAutoWateringEnabled) {
       const interval = setInterval(() => {
         checkSoilMoisture();
-      }, 60000); // every minute
+      }, 15000); // every 15 seconds now
       return () => clearInterval(interval);
     }
   }, [isAutoWateringEnabled]);
@@ -112,24 +112,32 @@ export default function WaterPlant({ navigation }) {
     }
   };
 
+  const [lastMoistureAlert, setLastMoistureAlert] = useState(false);
+
   const checkSoilMoisture = () => {
-    const moistureLevel = 20; // Force low for now (change to Math.random later)
+    // In future: Read real sensor value here
+    const moistureLevel = Math.floor(Math.random() * 100); // Simulate sensor
     setSoilMoisture(moistureLevel);
     console.log(`Soil Moisture: ${moistureLevel}%`);
-
+  
     if (moistureLevel < MOISTURE_THRESHOLD) {
+      if (!lastMoistureAlert) { 
+        PushNotification.localNotification({
+          channelId: "plant-care-channel",
+          title: "Low Moisture Alert ",
+          message: `Soil moisture is low (${moistureLevel}%). Please water your plant!`,
+          playSound: true,
+          soundName: 'default',
+          vibrate: true,
+        });
+        setLastMoistureAlert(true);
+      }
       handleWaterPlant();
-
-      PushNotification.localNotification({
-        channelId: "plant-care-channel", // must match created channel
-        title: "Low Moisture Alert 🌱",
-        message: `Soil moisture is low (${moistureLevel}%). Please water your plant!`,
-        playSound: true,
-        soundName: 'default',
-        vibrate: true,
-      });
+    } else {
+      setLastMoistureAlert(false);
     }
   };
+  
 
   const sendMQTTMessage = (message) => {
     if (client) {
@@ -225,9 +233,9 @@ export default function WaterPlant({ navigation }) {
         style={styles.testButton}
         onPress={() => {
           PushNotification.localNotification({
-            channelId: "plant-care-channel", // must match created channel
-            title: "🔔 Test Notification",
-            message: "This is a test! Notifications are working 🎯",
+            channelId: "plant-care-channel",
+            title: "Test Notification",
+            message: "This is a test! Notifications are working",
             playSound: true,
             soundName: 'default',
             vibrate: true,
